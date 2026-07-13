@@ -68,20 +68,20 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-accent/30">
-      <div className="w-full max-w-md p-8 bg-card rounded-xl border shadow-lg">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="w-full max-w-md p-8 bg-white rounded-xl border border-gray-200 shadow-lg">
         <div className="text-center mb-8">
-          <Link href="/" className="text-2xl font-bold text-primary">
+          <Link href="/" className="text-2xl font-bold text-sky-500">
             Quizlet
           </Link>
           <h1 className="text-2xl font-bold mt-6">Create your account</h1>
-          <p className="text-muted-foreground mt-2">
+          <p className="text-gray-500 mt-2">
             Start studying smarter today
           </p>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-destructive/10 text-destructive text-sm rounded-lg">
+          <div className="mb-6 p-4 bg-red-50 text-red-600 text-sm rounded-lg">
             {error}
           </div>
         )}
@@ -97,7 +97,7 @@ export default function RegisterPage() {
               disabled={isLoading}
             />
             {errors.name && (
-              <p className="text-sm text-destructive">{errors.name.message}</p>
+              <p className="text-sm text-red-500">{errors.name.message}</p>
             )}
           </div>
 
@@ -111,7 +111,7 @@ export default function RegisterPage() {
               disabled={isLoading}
             />
             {errors.email && (
-              <p className="text-sm text-destructive">{errors.email.message}</p>
+              <p className="text-sm text-red-500">{errors.email.message}</p>
             )}
           </div>
 
@@ -129,7 +129,7 @@ export default function RegisterPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
                 {showPassword ? (
                   <EyeOff className="w-4 h-4" />
@@ -139,9 +139,9 @@ export default function RegisterPage() {
               </button>
             </div>
             {errors.password && (
-              <p className="text-sm text-destructive">{errors.password.message}</p>
+              <p className="text-sm text-red-500">{errors.password.message}</p>
             )}
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-gray-500">
               Must be at least 8 characters with uppercase, lowercase, and number
             </p>
           </div>
@@ -159,10 +159,10 @@ export default function RegisterPage() {
         </form>
 
         <div className="mt-6 text-center text-sm">
-          <span className="text-muted-foreground">
+          <span className="text-gray-500">
             Already have an account?{' '}
           </span>
-          <Link href="/login" className="text-primary hover:underline font-medium">
+          <Link href="/login" className="text-sky-500 hover:underline font-medium">
             Sign in
           </Link>
         </div>

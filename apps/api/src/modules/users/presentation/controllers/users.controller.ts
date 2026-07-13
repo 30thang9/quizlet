@@ -1,7 +1,7 @@
 import { Controller, Get, Patch, Delete, Body, UseGuards, Request } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { UsersService } from '../../application/users.service';
-import { JwtAuthGuard } from '../../auth/infrastructure/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
 import { UpdateUserDto } from '../dto/update-user.dto';
 
 @ApiTags('Users')
@@ -16,13 +16,16 @@ export class UsersController {
   async getMe(@Request() req: any) {
     const user = await this.usersService.findById(req.user.id);
     return {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      avatarUrl: user.avatarUrl,
-      bio: user.bio,
-      role: user.role,
-      createdAt: user.createdAt,
+      success: true,
+      data: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        avatarUrl: user.avatarUrl,
+        bio: user.bio,
+        role: user.role,
+        createdAt: user.createdAt,
+      },
     };
   }
 
@@ -31,12 +34,15 @@ export class UsersController {
   async updateMe(@Request() req: any, @Body() dto: UpdateUserDto) {
     const user = await this.usersService.update(req.user.id, dto);
     return {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      avatarUrl: user.avatarUrl,
-      bio: user.bio,
-      role: user.role,
+      success: true,
+      data: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        avatarUrl: user.avatarUrl,
+        bio: user.bio,
+        role: user.role,
+      },
     };
   }
 
@@ -44,7 +50,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Delete current user account' })
   async deleteMe(@Request() req: any) {
     await this.usersService.softDelete(req.user.id);
-    return { message: 'Account deleted successfully' };
+    return { success: true, message: 'Account deleted successfully' };
   }
 
   @Get(':id')
@@ -52,12 +58,15 @@ export class UsersController {
   async getUser(@Request() req: any) {
     const user = await this.usersService.findById(req.params.id);
     return {
-      id: user.id,
-      name: user.name,
-      avatarUrl: user.avatarUrl,
-      bio: user.bio,
-      role: user.role,
-      createdAt: user.createdAt,
+      success: true,
+      data: {
+        id: user.id,
+        name: user.name,
+        avatarUrl: user.avatarUrl,
+        bio: user.bio,
+        role: user.role,
+        createdAt: user.createdAt,
+      },
     };
   }
 }

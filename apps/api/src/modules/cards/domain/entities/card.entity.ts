@@ -8,7 +8,6 @@ import {
   JoinColumn,
   Index,
 } from 'typeorm';
-import { StudySet } from '../../study-sets/domain/entities/study-set.entity';
 
 @Entity('cards')
 @Index('idx_cards_study_set', ['studySetId'])
@@ -20,10 +19,6 @@ export class Card {
   @Column({ name: 'study_set_id' })
   studySetId: string;
 
-  @ManyToOne(() => StudySet, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'study_set_id' })
-  studySet: StudySet;
-
   @Column({ type: 'text' })
   term: string;
 
@@ -31,10 +26,10 @@ export class Card {
   definition: string;
 
   @Column({ type: 'varchar', length: 500, nullable: true, name: 'image_url' })
-  imageUrl: string;
+  imageUrl?: string;
 
   @Column({ type: 'varchar', length: 500, nullable: true, name: 'audio_url' })
-  audioUrl: string;
+  audioUrl?: string;
 
   @Column({ type: 'integer', default: 0 })
   position: number;
@@ -56,10 +51,10 @@ export class Card {
   repetitions: number;
 
   @Column({ type: 'timestamp', nullable: true, name: 'next_review_at' })
-  nextReviewAt: Date;
+  nextReviewAt?: Date;
 
   @Column({ type: 'timestamp', nullable: true, name: 'last_reviewed_at' })
-  lastReviewedAt: Date;
+  lastReviewedAt?: Date;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
