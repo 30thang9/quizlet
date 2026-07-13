@@ -37,7 +37,6 @@ export class Card {
   @Column({ type: 'boolean', default: false, name: 'is_starred' })
   isStarred: boolean;
 
-  // SRS Fields
   @Column({ type: 'decimal', precision: 5, scale: 2, default: 0, name: 'memory_score' })
   memoryScore: number;
 
@@ -62,3 +61,5 @@ export class Card {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }
+
+export const CardEntity = Card;

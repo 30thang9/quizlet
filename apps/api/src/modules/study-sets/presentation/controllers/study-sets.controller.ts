@@ -29,14 +29,17 @@ export class StudySetsController {
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'search', required: false, type: String })
-  @ApiQuery({ name: 'subject', required: false, type: String })
   async getPublicSets(
     @Query('page') page?: number,
     @Query('limit') limit?: number,
     @Query('search') search?: string,
-    @Query('subject') subject?: string,
   ) {
-    const sets = await this.studySetsService.findPublic(page, limit, search, subject);
+    let sets;
+    if (search) {
+      sets = await this.studySetsService.search(search, page, limit);
+    } else {
+      sets = await this.studySetsService.findPublic(page, limit);
+    }
     return {
       success: true,
       data: sets,

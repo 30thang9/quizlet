@@ -1,16 +1,8 @@
 import { Injectable, Inject, NotFoundException, ConflictException } from '@nestjs/common';
-import { User, UserRole } from '../domain/entities/user.entity';
+import { User, UserRole } from '../domain/entities/user';
+import { IUserRepository } from '../domain/repositories/user.repository.interface';
 
-export const IUsersRepository = 'IUsersRepository';
-
-export interface IUsersRepository {
-  findById(id: string): Promise<User | null>;
-  findByEmail(email: string): Promise<User | null>;
-  existsByEmail(email: string): Promise<boolean>;
-  save(user: User): Promise<User>;
-  update(id: string, data: Partial<User>): Promise<User>;
-  softDelete(id: string): Promise<void>;
-}
+export const USER_REPOSITORY = 'USER_REPOSITORY';
 
 export interface CreateUserData {
   email: string;
@@ -22,12 +14,12 @@ export interface CreateUserData {
 @Injectable()
 export class UsersService {
   constructor(
-    @Inject(IUsersRepository)
-    private readonly usersRepository: IUsersRepository,
+    @Inject(USER_REPOSITORY)
+    readonly userRepository: IUserRepository,
   ) {}
 
   async findById(id: string): Promise<User> {
-    const user = await this.usersRepository.findById(id);
+    const user = await this.userRepository.findById(id);
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -35,31 +27,38 @@ export class UsersService {
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    return this.usersRepository.findByEmail(email);
+    return this.userRepository.findByEmail(email);
   }
 
   async create(data: CreateUserData): Promise<User> {
-    const exists = await this.usersRepository.existsByEmail(data.email);
+    const exists = await this.userRepository.existsByEmail(data.email);
     if (exists) {
       throw new ConflictException('Email already registered');
     }
 
-    const user = new User();
-    user.email = data.email;
-    user.passwordHash = data.passwordHash;
-    user.name = data.name;
-    user.role = data.role || UserRole.FREE;
-    user.isActive = true;
-    user.failedLoginAttempts = 0;
+    const user = User.create({
+      email: data.email,
+      passwordHash: data.passwordHash,
+      name: data.name,
+      role: data.role || 'free',
+      isActive: true,
+      failedLoginAttempts: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
 
-    return this.usersRepository.save(user);
+    await this.userRepository.save(user);
+    return user;
   }
 
-  async update(id: string, data: Partial<User>): Promise<User> {
-    return this.usersRepository.update(id, data);
+  async updateProfile(id: string, data: { name?: string; avatarUrl?: string; bio?: string }): Promise<User> {
+    const user = await this.findById(id);
+    user.updateProfile(data);
+    await this.userRepository.update(user);
+    return user;
   }
 
   async softDelete(id: string): Promise<void> {
-    await this.usersRepository.softDelete(id);
+    await this.userRepository.softDelete(id);
   }
 }

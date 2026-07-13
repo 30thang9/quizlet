@@ -32,7 +32,7 @@ export class UsersController {
   @Patch('me')
   @ApiOperation({ summary: 'Update current user profile' })
   async updateMe(@Request() req: any, @Body() dto: UpdateUserDto) {
-    const user = await this.usersService.update(req.user.id, dto);
+    const user = await this.usersService.updateProfile(req.user.id, dto);
     return {
       success: true,
       data: {

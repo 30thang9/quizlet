@@ -131,13 +131,6 @@ export class VersionsService {
 
     await this.cardRepository.save(newCards);
 
-    // Update study set
-    studySet.title = version.title || studySet.title;
-    studySet.description = version.description || studySet.description;
-    studySet.cardCount = version.cardCount;
-
-    await this.studySetRepository.save(studySet);
-
     return studySet;
   }
 

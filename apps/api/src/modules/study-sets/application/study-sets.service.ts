@@ -1,5 +1,5 @@
 import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { StudySet, Visibility } from '../domain/entities/study-set.entity';
+import { StudySet, Visibility } from '../domain/entities/study-set';
 import { Card } from '../../cards/domain/entities/card.entity';
 
 export const IStudySetsRepository = 'IStudySetsRepository';
@@ -7,12 +7,14 @@ export const ICardsRepository = 'ICardsRepository';
 
 export interface IStudySetsRepository {
   findById(id: string): Promise<StudySet | null>;
-  findByUserId(userId: string, options?: { page?: number; limit?: number }): Promise<StudySet[]>;
-  findPublic(options?: { page?: number; limit?: number; search?: string; subject?: string }): Promise<StudySet[]>;
+  findByUserId(userId: string, page?: number, limit?: number): Promise<StudySet[]>;
+  findPublic(page?: number, limit?: number): Promise<StudySet[]>;
+  search(query: string, page?: number, limit?: number): Promise<StudySet[]>;
   count(): Promise<number>;
-  save(studySet: StudySet): Promise<StudySet>;
-  update(id: string, data: Partial<StudySet>): Promise<StudySet>;
+  save(studySet: StudySet): Promise<void>;
+  update(studySet: StudySet): Promise<void>;
   delete(id: string): Promise<void>;
+  softDelete(id: string): Promise<void>;
   incrementViewCount(id: string): Promise<void>;
   incrementLikeCount(id: string): Promise<void>;
   decrementLikeCount(id: string): Promise<void>;
@@ -66,13 +68,11 @@ export class StudySetsService {
   async findByIdWithAccessCheck(id: string, userId?: string): Promise<StudySet> {
     const studySet = await this.findById(id);
 
-    // Public sets are accessible to everyone
-    if (studySet.visibility === Visibility.PUBLIC) {
+    if (studySet.isPublic()) {
       await this.studySetsRepository.incrementViewCount(id);
       return studySet;
     }
 
-    // Check if user is the owner
     if (studySet.userId === userId) {
       return studySet;
     }
@@ -81,27 +81,29 @@ export class StudySetsService {
   }
 
   async findByUserId(userId: string, page = 1, limit = 20): Promise<StudySet[]> {
-    return this.studySetsRepository.findByUserId(userId, { page, limit });
+    return this.studySetsRepository.findByUserId(userId, page, limit);
   }
 
-  async findPublic(page = 1, limit = 20, search?: string, subject?: string): Promise<StudySet[]> {
-    return this.studySetsRepository.findPublic({ page, limit, search, subject });
+  async findPublic(page = 1, limit = 20): Promise<StudySet[]> {
+    return this.studySetsRepository.findPublic(page, limit);
+  }
+
+  async search(query: string, page = 1, limit = 20): Promise<StudySet[]> {
+    return this.studySetsRepository.search(query, page, limit);
   }
 
   async create(data: CreateStudySetData): Promise<StudySet> {
-    const studySet = new StudySet();
-    studySet.userId = data.userId;
-    studySet.title = data.title;
-    studySet.description = data.description || '';
-    studySet.visibility = data.visibility || Visibility.PUBLIC;
-    studySet.language = data.language || '';
-    studySet.subject = data.subject || '';
-    studySet.cardCount = 0;
-    studySet.viewCount = 0;
-    studySet.likeCount = 0;
-    studySet.copyCount = 0;
+    const studySet = StudySet.create({
+      userId: data.userId,
+      title: data.title,
+      description: data.description,
+      visibility: data.visibility || 'public',
+      language: data.language,
+      subject: data.subject,
+    });
 
-    return this.studySetsRepository.save(studySet);
+    await this.studySetsRepository.save(studySet);
+    return studySet;
   }
 
   async update(id: string, userId: string, data: Partial<StudySet>): Promise<StudySet> {
@@ -111,7 +113,12 @@ export class StudySetsService {
       throw new ForbiddenException('You can only update your own study sets');
     }
 
-    return this.studySetsRepository.update(id, data);
+    if (data.title !== undefined) studySet.updateTitle(data.title);
+    if (data.description !== undefined) studySet.updateDescription(data.description);
+    if (data.visibility !== undefined) studySet.updateVisibility(data.visibility);
+
+    await this.studySetsRepository.update(studySet);
+    return studySet;
   }
 
   async delete(id: string, userId: string): Promise<void> {
@@ -121,21 +128,22 @@ export class StudySetsService {
       throw new ForbiddenException('You can only delete your own study sets');
     }
 
-    await this.studySetsRepository.delete(id);
+    await this.studySetsRepository.softDelete(id);
   }
 
   async getCards(studySetId: string): Promise<Card[]> {
-    await this.findById(studySetId); // Verify study set exists
+    await this.findById(studySetId);
     return this.cardsRepository.findByStudySetId(studySetId);
   }
 
   async createCard(data: CreateCardData): Promise<Card> {
-    await this.findById(data.studySetId); // Verify study set exists
+    await this.findById(data.studySetId);
 
     const existingCards = await this.cardsRepository.findByStudySetId(data.studySetId);
     const position = existingCards.length;
 
     const card = new Card();
+    card.id = crypto.randomUUID();
     card.studySetId = data.studySetId;
     card.term = data.term;
     card.definition = data.definition;
@@ -150,7 +158,6 @@ export class StudySetsService {
 
     const savedCard = await this.cardsRepository.save(card);
 
-    // Update card count
     await this.cardsRepository.updateCardCount(data.studySetId, position + 1);
 
     return savedCard;
@@ -164,6 +171,7 @@ export class StudySetsService {
 
     const cardEntities = cards.map((card, index) => {
       const entity = new Card();
+      entity.id = crypto.randomUUID();
       entity.studySetId = studySetId;
       entity.term = card.term;
       entity.definition = card.definition;
@@ -180,7 +188,6 @@ export class StudySetsService {
 
     const savedCards = await this.cardsRepository.saveMany(cardEntities);
 
-    // Update card count
     await this.cardsRepository.updateCardCount(studySetId, startPosition + cards.length);
 
     return savedCards;
@@ -213,7 +220,6 @@ export class StudySetsService {
 
     await this.cardsRepository.delete(cardId);
 
-    // Update card count
     const remainingCards = await this.cardsRepository.findByStudySetId(card.studySetId);
     await this.cardsRepository.updateCardCount(card.studySetId, remainingCards.length);
   }

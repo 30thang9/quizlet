@@ -1,22 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '../../domain/entities/user.entity';
-import { IUsersRepository } from '../../application/users.service';
+import { UserEntity } from './entities/user.entity';
+import { User } from '../../domain/entities/user';
+import { IUserRepository } from '../../domain/repositories/user.repository.interface';
+import { UserMapper } from './mappers/user.mapper';
 
 @Injectable()
-export class UsersRepository implements IUsersRepository {
+export class UsersRepository implements IUserRepository {
   constructor(
-    @InjectRepository(User)
-    private readonly repo: Repository<User>,
+    @InjectRepository(UserEntity)
+    private readonly repo: Repository<UserEntity>,
   ) {}
 
   async findById(id: string): Promise<User | null> {
-    return this.repo.findOne({ where: { id } });
+    const entity = await this.repo.findOne({ where: { id } });
+    return entity ? UserMapper.toDomain(entity) : null;
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    return this.repo.findOne({ where: { email } });
+    const entity = await this.repo.findOne({ where: { email } });
+    return entity ? UserMapper.toDomain(entity) : null;
   }
 
   async existsByEmail(email: string): Promise<boolean> {
@@ -24,13 +28,18 @@ export class UsersRepository implements IUsersRepository {
     return count > 0;
   }
 
-  async save(user: User): Promise<User> {
-    return this.repo.save(user);
+  async save(user: User): Promise<void> {
+    const entity = UserMapper.toEntity(user);
+    await this.repo.save(entity);
   }
 
-  async update(id: string, data: Partial<User>): Promise<User> {
-    await this.repo.update(id, data);
-    return this.findById(id) as Promise<User>;
+  async update(user: User): Promise<void> {
+    const entity = UserMapper.toEntity(user);
+    await this.repo.save(entity);
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.repo.delete(id);
   }
 
   async softDelete(id: string): Promise<void> {

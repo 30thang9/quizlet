@@ -2,8 +2,9 @@ import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { UsersService, CreateUserData } from '../../users/application/users.service';
-import { User } from '../../users/domain/entities/user.entity';
+import { UsersService } from '../../users/application/users.service';
+import { User } from '../../users/domain/entities/user';
+import { IUserRepository } from '../../users/domain/repositories/user.repository.interface';
 
 export interface TokenPayload {
   sub: string;
@@ -33,8 +34,6 @@ export class AuthService {
   private readonly ACCESS_TOKEN_EXPIRES_IN = '15m';
   private readonly REFRESH_TOKEN_EXPIRES_IN = '7d';
   private readonly SALT_ROUNDS = 12;
-  private readonly MAX_LOGIN_ATTEMPTS = 5;
-  private readonly LOCKOUT_DURATION_MINUTES = 15;
 
   constructor(
     private readonly usersService: UsersService,
@@ -75,7 +74,7 @@ export class AuthService {
       throw new UnauthorizedException('Account is deactivated');
     }
 
-    const isPasswordValid = await this.verifyPassword(password, user.passwordHash);
+    const isPasswordValid = await this.verifyPassword(password, user.propsCopy.passwordHash);
 
     if (!isPasswordValid) {
       await this.handleFailedLogin(user);
@@ -84,10 +83,8 @@ export class AuthService {
 
     // Reset failed login attempts on successful login
     if (user.failedLoginAttempts > 0) {
-      await this.usersService.update(user.id, {
-        failedLoginAttempts: 0,
-        lockedUntil: null as any,
-      });
+      user.resetFailedLogins();
+      await this.usersService.userRepository.update(user);
     }
 
     const tokens = await this.generateTokens(user);
@@ -126,8 +123,6 @@ export class AuthService {
   }
 
   async logout(userId: string): Promise<void> {
-    // In a real app, you would invalidate the refresh token
-    // For now, we just clear it by saving a new hash
     await this.saveRefreshTokenHash(userId, '');
   }
 
@@ -165,26 +160,17 @@ export class AuthService {
   }
 
   private async saveRefreshTokenHash(userId: string, token: string): Promise<void> {
-    // In production, store hashed token in database for revocation
-    // For MVP, we'll skip this implementation
+    // TODO: Implement refresh token storage
   }
 
   private async verifyRefreshTokenHash(userId: string, token: string): Promise<boolean> {
-    // In production, verify against stored hash
+    // TODO: Implement refresh token verification
     return true;
   }
 
   private async handleFailedLogin(user: User): Promise<void> {
-    const attempts = user.failedLoginAttempts + 1;
-    const updates: Partial<User> = { failedLoginAttempts: attempts };
-
-    if (attempts >= this.MAX_LOGIN_ATTEMPTS) {
-      const lockUntil = new Date();
-      lockUntil.setMinutes(lockUntil.getMinutes() + this.LOCKOUT_DURATION_MINUTES);
-      updates.lockedUntil = lockUntil;
-    }
-
-    await this.usersService.update(user.id, updates);
+    user.recordFailedLogin();
+    await this.usersService.userRepository.update(user);
   }
 
   private sanitizeUser(user: User) {

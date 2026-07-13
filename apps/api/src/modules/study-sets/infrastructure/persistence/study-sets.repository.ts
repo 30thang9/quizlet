@@ -1,72 +1,84 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like } from 'typeorm';
-import { StudySet, Visibility } from '../../domain/entities/study-set.entity';
+import { Repository, Like, IsNull } from 'typeorm';
+import { StudySetEntity, Visibility } from './entities/study-set.entity';
+import { StudySet } from '../../domain/entities/study-set';
+import { IStudySetRepository } from '../../domain/repositories/study-set.repository.interface';
+import { StudySetMapper } from './mappers/study-set.mapper';
 
 @Injectable()
-export class StudySetsRepository {
+export class StudySetsRepository implements IStudySetRepository {
   constructor(
-    @InjectRepository(StudySet)
-    private readonly repo: Repository<StudySet>,
+    @InjectRepository(StudySetEntity)
+    private readonly repo: Repository<StudySetEntity>,
   ) {}
 
   async findById(id: string): Promise<StudySet | null> {
-    return this.repo.findOne({
-      where: { id },
+    const entity = await this.repo.findOne({
+      where: { id, deletedAt: IsNull() },
       relations: ['user'],
     });
+    return entity ? StudySetMapper.toDomain(entity) : null;
   }
 
-  async findByUserId(userId: string, options: { page?: number; limit?: number } = {}): Promise<StudySet[]> {
-    const { page = 1, limit = 20 } = options;
+  async findByUserId(userId: string, page = 1, limit = 20): Promise<StudySet[]> {
     const skip = (page - 1) * limit;
-
-    return this.repo.find({
-      where: { userId },
+    const entities = await this.repo.find({
+      where: { userId, deletedAt: IsNull() },
       order: { createdAt: 'DESC' },
       skip,
       take: limit,
     });
+    return entities.map(StudySetMapper.toDomain);
   }
 
-  async findPublic(options: { page?: number; limit?: number; search?: string; subject?: string } = {}): Promise<StudySet[]> {
-    const { page = 1, limit = 20, search, subject } = options;
+  async findPublic(page = 1, limit = 20): Promise<StudySet[]> {
     const skip = (page - 1) * limit;
-
-    const where: any = { visibility: Visibility.PUBLIC };
-
-    if (search) {
-      where.title = Like(`%${search}%`);
-    }
-
-    if (subject) {
-      where.subject = subject;
-    }
-
-    return this.repo.find({
-      where,
+    const entities = await this.repo.find({
+      where: { visibility: Visibility.PUBLIC, deletedAt: IsNull() },
       relations: ['user'],
       order: { createdAt: 'DESC' },
       skip,
       take: limit,
     });
+    return entities.map(StudySetMapper.toDomain);
   }
 
-  async count(): Promise<number> {
-    return this.repo.count();
+  async search(query: string, page = 1, limit = 20): Promise<StudySet[]> {
+    const skip = (page - 1) * limit;
+    const entities = await this.repo.find({
+      where: [
+        { title: Like(`%${query}%`), visibility: Visibility.PUBLIC, deletedAt: IsNull() },
+        { description: Like(`%${query}%`), visibility: Visibility.PUBLIC, deletedAt: IsNull() },
+      ],
+      relations: ['user'],
+      order: { createdAt: 'DESC' },
+      skip,
+      take: limit,
+    });
+    return entities.map(StudySetMapper.toDomain);
   }
 
-  async save(studySet: StudySet): Promise<StudySet> {
-    return this.repo.save(studySet);
+  async save(studySet: StudySet): Promise<void> {
+    const entity = StudySetMapper.toEntity(studySet);
+    await this.repo.save(entity);
   }
 
-  async update(id: string, data: Partial<StudySet>): Promise<StudySet> {
-    await this.repo.update(id, data);
-    return this.findById(id) as Promise<StudySet>;
+  async update(studySet: StudySet): Promise<void> {
+    const entity = StudySetMapper.toEntity(studySet);
+    await this.repo.save(entity);
   }
 
   async delete(id: string): Promise<void> {
+    await this.repo.delete(id);
+  }
+
+  async softDelete(id: string): Promise<void> {
     await this.repo.softDelete(id);
+  }
+
+  async count(): Promise<number> {
+    return this.repo.count({ where: { deletedAt: IsNull() } });
   }
 
   async incrementViewCount(id: string): Promise<void> {
@@ -78,7 +90,6 @@ export class StudySetsRepository {
   }
 
   async decrementLikeCount(id: string): Promise<void> {
-    await this.repo.decrement({ id, likeCount: 0 }, 'likeCount', 0);
     await this.repo.decrement({ id, likeCount: 1 }, 'likeCount', 1);
   }
 }
