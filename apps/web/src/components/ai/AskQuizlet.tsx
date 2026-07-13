@@ -15,11 +15,10 @@ interface Message {
 
 interface AskQuizletProps {
   context?: string;
-  studySetId?: string;
   onClose?: () => void;
 }
 
-export function AskQuizlet({ context, studySetId, onClose }: AskQuizletProps) {
+export function AskQuizlet({ context, onClose }: AskQuizletProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',

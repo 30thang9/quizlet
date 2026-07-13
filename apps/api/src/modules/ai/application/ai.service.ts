@@ -64,25 +64,16 @@ export class AiService {
    */
   async generateFlashcards(options: FlashcardGenerationOptions): Promise<GeneratedCard[]> {
     const { content, cardCount = 10, difficulty = 'intermediate', includeHints = true, provider } = options;
-    const aiProvider = provider || this.defaultProvider;
 
     if (!content || content.trim().length < 50) {
       throw new BadRequestException('Content must be at least 50 characters');
     }
 
-    const systemPrompt = this.getFlashcardSystemPrompt(includeHints);
-    const userPrompt = this.getFlashcardUserPrompt(content, cardCount, difficulty);
-
-    try {
-      const result = await this.callAI(aiProvider, systemPrompt, userPrompt, 'flashcards');
-      if (Array.isArray(result)) {
-        return result as GeneratedCard[];
-      }
-      throw new Error('Invalid response format');
-    } catch (error) {
-      console.error('AI Flashcard Generation Error:', error);
-      throw new BadRequestException('Failed to generate flashcards');
-    }
+    return this.executeAIAsync<GeneratedCard[]>(
+      'generate flashcards',
+      () => this.callAI(provider || this.defaultProvider, this.getFlashcardSystemPrompt(includeHints), this.getFlashcardUserPrompt(content, cardCount, difficulty), 'flashcards'),
+      (result) => Array.isArray(result) ? result as GeneratedCard[] : null,
+    );
   }
 
   /**
@@ -90,25 +81,16 @@ export class AiService {
    */
   async generateSummary(options: SummaryOptions): Promise<string> {
     const { content, maxLength = 200, provider } = options;
-    const aiProvider = provider || this.defaultProvider;
 
     if (!content || content.trim().length < 100) {
       throw new BadRequestException('Content must be at least 100 characters');
     }
 
-    const systemPrompt = 'You are an expert at summarizing educational content. Create concise, informative summaries.';
-    const userPrompt = `Summarize in ${maxLength} chars:\n\n${content}`;
-
-    try {
-      const result = await this.callAI(aiProvider, systemPrompt, userPrompt, 'summary');
-      if (typeof result === 'string') {
-        return result;
-      }
-      return (result as GeneratedCard[])[0]?.definition || (result as GeneratedCard[])[0]?.term || '';
-    } catch (error) {
-      console.error('AI Summary Generation Error:', error);
-      throw new BadRequestException('Failed to generate summary');
-    }
+    return this.executeAIAsync<string>(
+      'generate summary',
+      () => this.callAI(provider || this.defaultProvider, 'You summarize educational content concisely.', `Summarize in ${maxLength} chars:\n\n${content}`, 'summary'),
+      (result) => typeof result === 'string' ? result : (Array.isArray(result) ? (result[0]?.definition || result[0]?.term || '') : ''),
+    );
   }
 
   /**
@@ -120,66 +102,55 @@ export class AiService {
     type: 'multiple_choice' | 'true_false' = 'multiple_choice',
     provider?: AIProvider,
   ): Promise<QuizQuestion[]> {
-    const aiProvider = provider || this.defaultProvider;
-
     if (!content || content.trim().length < 100) {
       throw new BadRequestException('Content must be at least 100 characters');
     }
 
-    const systemPrompt = this.getQuizSystemPrompt(type);
-    const userPrompt = this.getQuizUserPrompt(content, questionCount, type);
-
-    try {
-      const result = await this.callAI(aiProvider, systemPrompt, userPrompt, 'quiz');
-      if (Array.isArray(result)) {
-        return result as QuizQuestion[];
-      }
-      throw new Error('Invalid response format');
-    } catch (error) {
-      console.error('AI Quiz Generation Error:', error);
-      throw new BadRequestException('Failed to generate quiz');
-    }
+    return this.executeAIAsync<QuizQuestion[]>(
+      'generate quiz',
+      () => this.callAI(provider || this.defaultProvider, this.getQuizSystemPrompt(type), this.getQuizUserPrompt(content, questionCount, type), 'quiz'),
+      (result) => Array.isArray(result) ? result as QuizQuestion[] : null,
+    );
   }
 
   /**
    * Enhance existing flashcards with AI suggestions
    */
   async enhanceFlashcards(cards: { term: string; definition: string }[], provider?: AIProvider): Promise<GeneratedCard[]> {
-    const aiProvider = provider || this.defaultProvider;
-
-    const systemPrompt = `You enhance educational flashcards. Add better definitions, memory hints, and examples.`;
     const userPrompt = `Enhance these flashcards:\n\n${cards.map((c, i) => `${i + 1}. Term: ${c.term}\n   Definition: ${c.definition}`).join('\n\n')}`;
 
-    try {
-      const result = await this.callAI(aiProvider, systemPrompt, userPrompt, 'flashcards');
-      if (Array.isArray(result)) {
-        return result as GeneratedCard[];
-      }
-      throw new Error('Invalid response format');
-    } catch (error) {
-      console.error('AI Card Enhancement Error:', error);
-      throw new BadRequestException('Failed to enhance flashcards');
-    }
+    return this.executeAIAsync<GeneratedCard[]>(
+      'enhance flashcards',
+      () => this.callAI(provider || this.defaultProvider, 'You enhance educational flashcards with better definitions, memory hints, and examples.', userPrompt, 'flashcards'),
+      (result) => Array.isArray(result) ? result as GeneratedCard[] : null,
+    );
   }
 
   /**
    * Answer questions about study content
    */
   async answerQuestion(question: string, context: string, provider?: AIProvider): Promise<string> {
-    const aiProvider = provider || this.defaultProvider;
+    return this.executeAIAsync<string>(
+      'answer question',
+      () => this.callAI(provider || this.defaultProvider, 'You are a helpful AI tutor. Answer questions based on the provided study content.', `Context:\n${context}\n\nQuestion: ${question}`, 'text'),
+      (result) => typeof result === 'string' ? result : JSON.stringify(result),
+    );
+  }
 
-    const systemPrompt = 'You are a helpful AI tutor. Answer questions based on the provided study content.';
-    const userPrompt = `Context:\n${context}\n\nQuestion: ${question}`;
-
+  /**
+   * Execute AI operation with consistent error handling
+   */
+  private async executeAIAsync<T>(operation: string, fn: () => Promise<any>, validator: (result: any) => T | null): Promise<T> {
     try {
-      const result = await this.callAI(aiProvider, systemPrompt, userPrompt, 'text');
-      if (typeof result === 'string') {
-        return result;
+      const result = await fn();
+      const validated = validator(result);
+      if (validated === null) {
+        throw new Error('Invalid response format');
       }
-      return JSON.stringify(result);
+      return validated;
     } catch (error) {
-      console.error('AI Q&A Error:', error);
-      throw new BadRequestException('Failed to answer question');
+      console.error(`AI ${operation} Error:`, error);
+      throw new BadRequestException(`Failed to ${operation}`);
     }
   }
 
@@ -311,7 +282,7 @@ Rules:
   private getFlashcardUserPrompt(content: string, cardCount: number, difficulty: string): string {
     const diffMap = {
       basic: 'simple, foundational terms',
-      intermediate: '中等难度，包含概念和定义',
+      intermediate: 'intermediate level with concepts and definitions',
       advanced: 'complex concepts, examples, nuances',
     };
     return `Content:\n${content}\n\nGenerate ${cardCount} flashcards (${diffMap[difficulty as keyof typeof diffMap] || diffMap.intermediate}):`;
