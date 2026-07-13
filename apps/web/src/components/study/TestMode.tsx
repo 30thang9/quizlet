@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { FileText, Clock, Check, X, Trophy, RotateCcw, ChevronRight } from 'lucide-react';
 import { Card } from './StudySession';
 
@@ -33,6 +33,10 @@ export function TestMode({ cards, title, questionCount = 10, timeLimit = 0, onCo
   const [timeSpent, setTimeSpent] = useState(0);
   const [isReviewMode, setIsReviewMode] = useState(false);
 
+  // Ref for callback to avoid dependency issues
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
+
   // Generate questions from cards
   const generateQuestions = useCallback(() => {
     const shuffled = [...cards].sort(() => Math.random() - 0.5);
@@ -60,6 +64,38 @@ export function TestMode({ cards, title, questionCount = 10, timeLimit = 0, onCo
     });
   }, [cards, questionCount]);
 
+  const finishTestRef = useRef<() => void>(() => {
+    setIsComplete(true);
+    setIsReviewMode(true);
+    
+    const correct = questions.filter((q) => q.isCorrect).length;
+    const timeSpentSeconds = timeLimit > 0 ? timeLimit - timeLeft : timeSpent;
+    onCompleteRef.current?.({
+      score: Math.round((correct / questions.length) * 100),
+      correct,
+      incorrect: questions.length - correct,
+      timeSpent: timeSpentSeconds,
+    });
+  });
+
+  // Keep ref updated with latest values
+  useEffect(() => {
+    finishTestRef.current = () => {
+      setIsComplete(true);
+      setIsReviewMode(true);
+      
+      const correct = questions.filter((q) => q.isCorrect).length;
+      const timeSpentSeconds = timeLimit > 0 ? timeLimit - timeLeft : timeSpent;
+      onCompleteRef.current?.({
+        score: Math.round((correct / questions.length) * 100),
+        correct,
+        incorrect: questions.length - correct,
+        timeSpent: timeSpentSeconds,
+      });
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questions, timeLimit, timeLeft]);
+
   const startTest = () => {
     setQuestions(generateQuestions());
     setIsStarted(true);
@@ -80,7 +116,7 @@ export function TestMode({ cards, title, questionCount = 10, timeLimit = 0, onCo
       setTimeLeft((prev) => {
         if (prev <= 1) {
           // Time's up - auto-submit
-          handleFinishTest();
+          finishTestRef.current();
           return 0;
         }
         return prev - 1;
@@ -91,7 +127,7 @@ export function TestMode({ cards, title, questionCount = 10, timeLimit = 0, onCo
     return () => clearInterval(timer);
   }, [isStarted, isComplete, isReviewMode, timeLimit]);
 
-  const handleSelectAnswer = (index: number) => {
+  const handleSelectAnswer = useCallback((index: number) => {
     if (isAnswered) return;
     
     setSelectedAnswer(index);
@@ -105,7 +141,7 @@ export function TestMode({ cards, title, questionCount = 10, timeLimit = 0, onCo
           : q
       )
     );
-  };
+  }, [isAnswered, currentIndex]);
 
   const handleNext = () => {
     if (currentIndex < questions.length - 1) {
@@ -113,22 +149,8 @@ export function TestMode({ cards, title, questionCount = 10, timeLimit = 0, onCo
       setSelectedAnswer(null);
       setIsAnswered(false);
     } else {
-      handleFinishTest();
+      finishTestRef.current();
     }
-  };
-
-  const handleFinishTest = () => {
-    setIsComplete(true);
-    setIsReviewMode(true);
-    
-    const correct = questions.filter((q) => q.isCorrect).length;
-    const timeSpentSeconds = timeLimit > 0 ? timeLimit - timeLeft : timeSpent;
-    onComplete?.({
-      score: Math.round((correct / questions.length) * 100),
-      correct,
-      incorrect: questions.length - correct,
-      timeSpent: timeSpentSeconds,
-    });
   };
 
   const formatTime = (seconds: number) => {

@@ -25,6 +25,7 @@ Tài liệu này tổng hợp **100% tính năng** của Quizlet để lên kế
 | `12-security-privacy.md` | Bảo mật & Quyền riêng tư |
 | `13-technical-architecture.md` | Kiến trúc kỹ thuật đề xuất |
 | `14-implementation-roadmap.md` | Lộ trình triển khai |
+| `15-code-quality-standards.md` | Code quality & Best practices |
 
 ---
 
