@@ -3,10 +3,12 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { FileText, Clock, Check, X, Trophy, RotateCcw, ChevronRight } from 'lucide-react';
 import { Card } from './StudySession';
+import { useProgress } from '@/hooks/useProgress';
 
 interface TestModeProps {
   cards: Card[];
   title: string;
+  studySetId?: string;
   questionCount?: number;
   timeLimit?: number; // in seconds, 0 = no limit
   onComplete?: (results: { score: number; correct: number; incorrect: number; timeSpent: number }) => void;
@@ -15,6 +17,7 @@ interface TestModeProps {
 
 interface Question {
   id: string;
+  cardId: string;
   question: string;
   options: string[];
   correctIndex: number;
@@ -22,7 +25,7 @@ interface Question {
   isCorrect?: boolean;
 }
 
-export function TestMode({ cards, title, questionCount = 10, timeLimit = 0, onComplete, onExit }: TestModeProps) {
+export function TestMode({ cards, title, studySetId, questionCount = 10, timeLimit = 0, onComplete, onExit }: TestModeProps) {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -32,6 +35,10 @@ export function TestMode({ cards, title, questionCount = 10, timeLimit = 0, onCo
   const [timeLeft, setTimeLeft] = useState(timeLimit);
   const [timeSpent, setTimeSpent] = useState(0);
   const [isReviewMode, setIsReviewMode] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const sessionStartRef = useRef<number>(0);
+  
+  const progress = useProgress();
 
   // Ref for callback to avoid dependency issues
   const onCompleteRef = useRef(onComplete);
@@ -57,6 +64,7 @@ export function TestMode({ cards, title, questionCount = 10, timeLimit = 0, onCo
       
       return {
         id: `q-${index}`,
+        cardId: card.id,
         question: card.term,
         options: options.map((o) => o.text),
         correctIndex: options.findIndex((o) => o.text === card.definition),
@@ -69,35 +77,51 @@ export function TestMode({ cards, title, questionCount = 10, timeLimit = 0, onCo
     setIsReviewMode(true);
     
     const correct = questions.filter((q) => q.isCorrect).length;
-    const timeSpentSeconds = timeLimit > 0 ? timeLimit - timeLeft : timeSpent;
+    const totalTimeSpent = timeLimit > 0 ? timeLimit - timeLeft : timeSpent;
+    const score = Math.round((correct / questions.length) * 100);
+    
     onCompleteRef.current?.({
-      score: Math.round((correct / questions.length) * 100),
+      score,
       correct,
       incorrect: questions.length - correct,
-      timeSpent: timeSpentSeconds,
+      timeSpent: totalTimeSpent,
     });
   });
 
   // Keep ref updated with latest values
   useEffect(() => {
-    finishTestRef.current = () => {
+    finishTestRef.current = async () => {
       setIsComplete(true);
       setIsReviewMode(true);
       
       const correct = questions.filter((q) => q.isCorrect).length;
-      const timeSpentSeconds = timeLimit > 0 ? timeLimit - timeLeft : timeSpent;
+      const totalTimeSpent = timeLimit > 0 ? timeLimit - timeLeft : timeSpent;
+      const score = Math.round((correct / questions.length) * 100);
+      
+      // Save to backend
+      if (sessionId) {
+        await progress.endSession(sessionId, {
+          cardsStudied: questions.length,
+          correctCount: correct,
+          timeSpentSeconds: totalTimeSpent,
+          mistakes: questions.length - correct,
+          score,
+        });
+      }
+      
       onCompleteRef.current?.({
-        score: Math.round((correct / questions.length) * 100),
+        score,
         correct,
         incorrect: questions.length - correct,
-        timeSpent: timeSpentSeconds,
+        timeSpent: totalTimeSpent,
       });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [questions, timeLimit, timeLeft]);
+  }, [questions, timeLimit, timeLeft, sessionId, progress]);
 
-  const startTest = () => {
-    setQuestions(generateQuestions());
+  const startTest = async () => {
+    const generatedQuestions = generateQuestions();
+    setQuestions(generatedQuestions);
     setIsStarted(true);
     setCurrentIndex(0);
     setSelectedAnswer(null);
@@ -106,6 +130,16 @@ export function TestMode({ cards, title, questionCount = 10, timeLimit = 0, onCo
     setTimeLeft(timeLimit);
     setTimeSpent(0);
     setIsReviewMode(false);
+    sessionStartRef.current = Date.now();
+    
+    // Create session on backend
+    const session = await progress.createSession({
+      studySetId,
+      mode: 'test',
+    });
+    if (session) {
+      setSessionId(session.id);
+    }
   };
 
   // Timer

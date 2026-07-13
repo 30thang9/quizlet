@@ -176,6 +176,8 @@ export const apiEndpoints = {
       api.post('/auth/register', body),
     refresh: (body: { refreshToken: string }) => api.post('/auth/refresh', body),
     logout: () => api.post('/auth/logout'),
+    forgotPassword: (body: { email: string }) => api.post('/auth/forgot-password', body),
+    resetPassword: (body: { token: string; newPassword: string }) => api.post('/auth/reset-password', body),
   },
 
   users: {
@@ -187,9 +189,9 @@ export const apiEndpoints = {
     list: (params?: { page?: number; limit?: number }) =>
       api.get('/study-sets', { params }),
     get: (id: string) => api.get(`/study-sets/${id}`),
-    create: (data: { title: string; description?: string; visibility?: string }) =>
+    create: (data: { title: string; description?: string; visibility?: string; folderId?: string }) =>
       api.post('/study-sets', data),
-    update: (id: string, data: Partial<{ title: string; description: string }>) =>
+    update: (id: string, data: Partial<{ title: string; description: string; folderId?: string }>) =>
       api.patch(`/study-sets/${id}`, data),
     delete: (id: string) => api.delete(`/study-sets/${id}`),
     like: (id: string) => api.post(`/study-sets/${id}/like`),
@@ -203,6 +205,44 @@ export const apiEndpoints = {
     update: (cardId: string, data: Partial<{ term: string; definition: string }>) =>
       api.patch(`/cards/${cardId}`, data),
     delete: (cardId: string) => api.delete(`/cards/${cardId}`),
+  },
+
+  folders: {
+    list: () => api.get('/folders'),
+    get: (id: string) => api.get(`/folders/${id}`),
+    create: (data: { name: string; color?: string; parentId?: string }) =>
+      api.post('/folders', data),
+    update: (id: string, data: Partial<{ name: string; color?: string; parentId?: string }>) =>
+      api.patch(`/folders/${id}`, data),
+    delete: (id: string) => api.delete(`/folders/${id}`),
+    getStudySets: (id: string, params?: { page?: number; limit?: number }) =>
+      api.get(`/folders/${id}/study-sets`, { params }),
+    addStudySet: (id: string, data: { studySetId: string }) =>
+      api.post(`/folders/${id}/study-sets`, data),
+    removeStudySet: (id: string, studySetId: string) =>
+      api.delete(`/folders/${id}/study-sets/${studySetId}`),
+  },
+
+  progress: {
+    createSession: (data: { studySetId?: string; mode?: string }) =>
+      api.post('/progress/sessions', data),
+    endSession: (sessionId: string, data: {
+      cardsStudied: number;
+      correctCount: number;
+      timeSpentSeconds: number;
+      mistakes: number;
+      score?: number;
+    }) => api.patch(`/progress/sessions/${sessionId}`, data),
+    reviewCard: (data: { cardId: string; studySessionId?: string; quality: number }) =>
+      api.post('/progress/review', data),
+    getCardProgress: (cardId: string) => api.get(`/progress/cards/${cardId}`),
+    getDueCards: (params?: { studySetId?: string; limit?: number }) =>
+      api.get('/progress/due', { params }),
+    getStudySetProgress: (studySetId: string) =>
+      api.get(`/progress/study-sets/${studySetId}`),
+    getSessionHistory: (params?: { studySetId?: string; page?: number; limit?: number }) =>
+      api.get('/progress/sessions', { params }),
+    getStats: () => api.get('/progress/stats'),
   },
 
   search: {

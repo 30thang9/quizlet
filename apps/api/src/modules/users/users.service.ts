@@ -5,8 +5,9 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, MoreThan } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import { User } from './entities/user.entity';
 import { CreateUserDto, UpdateUserDto, UserRole } from './dto';
 
@@ -141,5 +142,46 @@ export class UsersService {
       .getManyAndCount();
 
     return { users, total };
+  }
+
+  async createPasswordResetToken(email: string): Promise<{ token: string; expiresAt: Date } | null> {
+    const user = await this.findByEmail(email);
+    if (!user) {
+      return null;
+    }
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+
+    user.resetToken = token;
+    user.resetTokenExpiresAt = expiresAt;
+    await this.userRepository.save(user);
+
+    return { token, expiresAt };
+  }
+
+  async validatePasswordResetToken(token: string): Promise<User | null> {
+    const user = await this.userRepository.findOne({
+      where: {
+        resetToken: token,
+        resetTokenExpiresAt: MoreThan(new Date()),
+      },
+    });
+
+    return user || null;
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<User | null> {
+    const user = await this.validatePasswordResetToken(token);
+    if (!user) {
+      return null;
+    }
+
+    user.passwordHash = await bcrypt.hash(newPassword, 10);
+    user.resetToken = null as any;
+    user.resetTokenExpiresAt = null as any;
+    await this.userRepository.save(user);
+
+    return user;
   }
 }

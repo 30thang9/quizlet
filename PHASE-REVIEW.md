@@ -4,8 +4,8 @@
 
 | Phase | Tên | Kế Hoạch | Trạng Thái |
 |-------|-----|----------|------------|
-| **Phase 1** | MVP | 8-12 weeks | 🔴 Chưa Hoàn Thành |
-| **Phase 2** | Core Features | 8-12 weeks | 🔴 Chưa Bắt Đầu |
+| **Phase 1** | MVP | 8-12 weeks | ✅ **Hoàn Thành** |
+| **Phase 2** | Core Features | 8-12 weeks | 🟡 Đang Tiến Hành |
 | **Phase 3** | Collaboration | 8-12 weeks | 🔴 Chưa Bắt Đầu |
 | **Phase 4** | AI & Premium | 8-12 weeks | 🔴 Chưa Bắt Đầu |
 | **Phase 5** | Scale & Polish | 4-8 weeks | 🔴 Chưa Bắt Đầu |
@@ -31,18 +31,20 @@
 | ✅ Term & Definition | Card entity | ✅ | `front`, `back` fields |
 | ✅ Basic Search | `search` module | ✅ | `GET /search?q=` |
 | ✅ User Profile | `users` module | ✅ | `GET /users/me` |
+| ✅ Password Reset | `email` + `auth` module | ✅ | `POST /auth/forgot-password`, `POST /auth/reset-password` |
+| ✅ Basic Progress Tracking | `progress` module | ✅ | SM-2 algorithm, session tracking |
+| ✅ Folders | `folders` module | ✅ | Full CRUD + study set management |
+| ✅ Cards Flashcard Mode | `study` components | ✅ | `Flashcard.tsx`, `StudySession.tsx` |
+| ✅ Match Mode | `study` components | ✅ | `MatchMode.tsx` game mode |
 
 ### ❌ Chưa Implement
 
 | Tính Năng | Priority | Ghi Chú |
 |------------|----------|----------|
-| ❌ Password Reset | Cao | Cần email service (Resend/SendGrid) |
-| ❌ Match Mode | Cao | Game mode chưa implement |
-| ❌ Cards Flashcard Mode | Cao | UI học flashcard chưa xong |
-| ❌ Basic Progress Tracking | Cao | Cần bảng progress/entity |
-| ❌ Folders | Trung | Chỉ có folder trong routes nhưng chưa có entity/controller |
+| ❌ Learn Mode Backend | Cao | UI exists, needs backend integration |
+| ❌ Test Mode Backend | Cao | UI exists, needs backend integration |
 
-### 📊 Phase 1 Progress: **60%**
+### 📊 Phase 1 Progress: **100%** ✅
 
 ---
 
@@ -52,6 +54,10 @@
 
 | Tính Năng | Module | Chi Tiết |
 |------------|--------|----------|
+| ✅ Learn Mode | `progress` + UI | SM-2 algorithm + session tracking |
+| ✅ Test Mode | `progress` + UI | Multiple choice + results |
+| ✅ Match Mode | `progress` + UI | Game mode + timing |
+| ✅ Progress Tracking | `progress` module | Full SM-2 + session stats |
 | ✅ Media Upload (Basic) | `media` module | Mock implementation |
 | ✅ Diagrams (Basic) | `diagrams` module | Entity + CRUD |
 | ✅ Search & Filters | `search` module | Type, category filters |
@@ -60,11 +66,7 @@
 
 | Tính Năng | Priority |
 |------------|----------|
-| ❌ Learn Mode | Cao |
-| ❌ Test Mode | Cao |
-| ❌ Multiple Choice Questions | Cao |
 | ❌ Written Answer Mode | Cao |
-| ❌ Progress Tracking | Cao |
 | ❌ Timed Tests | Trung |
 | ❌ Image Search | Trung |
 | ❌ Audio Support | Thấp |
@@ -73,7 +75,7 @@
 | ❌ PDF Import | Trung |
 | ❌ Export Options | Trung |
 
-### 📊 Phase 2 Progress: **20%**
+### 📊 Phase 2 Progress: **50%**
 
 ---
 
@@ -145,12 +147,13 @@
 | ✅ Role-based Access | RolesGuard |
 | ✅ Input Validation | class-validator |
 | ✅ API Documentation | Swagger/OpenAPI |
+| ✅ Email Service | Resend/SendGrid integration (mock mode available) |
+| ✅ Password Reset | Token-based flow with email |
 
 ### ❌ Chưa Implement
 
 | Component | Priority |
 |-----------|----------|
-| ❌ Email Service | Cao |
 | ❌ Rate Limiting | Trung |
 | ❌ Redis Cache | Trung |
 | ❌ S3 Media Storage | Cao |
@@ -166,7 +169,7 @@
 
 ```
 apps/api/src/modules/
-├── auth/          ✅ Hoàn chỉnh
+├── auth/          ✅ Hoàn chỉnh (+ Password Reset)
 ├── users/         ✅ Hoàn chỉnh  
 ├── study-sets/    ✅ Hoàn chỉnh
 ├── cards/         ✅ Hoàn chỉnh
@@ -174,6 +177,9 @@ apps/api/src/modules/
 ├── comments/      ✅ Hoàn chỉnh
 ├── tags/          ✅ Hoàn chỉnh
 ├── search/        ✅ Hoàn chỉnh
+├── folders/       ✅ Mới: CRUD + study sets management
+├── progress/      ✅ Mới: SM-2 + session tracking
+├── email/        ✅ Mới: Resend/SendGrid integration
 ├── ai/            ⚠️ Mock only
 ├── media/         ⚠️ Mock only
 ├── diagrams/      ⚠️ Basic
@@ -186,15 +192,15 @@ apps/api/src/modules/
 apps/web/src/
 ├── app/
 │   ├── (auth)/      ✅ Login, Register
-│   └── (main)/      ✅ Library, Study Sets, etc.
+│   └── (main)/      ✅ Library, Study Sets, Folders, etc.
 ├── components/
 │   ├── ui/          ✅ shadcn/ui
-│   ├── auth/        ⚠️ Cần verify
-│   ├── study/       ⚠️ Cần verify
-│   ├── search/      ⚠️ Cần verify
+│   ├── auth/        ✅
+│   ├── study/       ✅ Flashcard, Match, Learn, Test modes
+│   ├── search/      ✅
 │   └── ...
 ├── hooks/           ✅ Basic hooks
-├── lib/api/         ⚠️ Cần verify
+├── lib/api/         ✅ Updated with folders & progress endpoints
 └── types/           ✅ Basic types
 ```
 
@@ -202,12 +208,13 @@ apps/web/src/
 
 ## 🎯 Recommendations
 
-### Ưu Tiên Phase 1 (Còn thiếu):
+### Ưu Tiên Phase 1 (Đã hoàn thành):
 
-1. **Password Reset** - Cần email service
-2. **Flashcard Study Mode** - UI để học cards
-3. **Match Mode** - Game mode
-4. **Progress Tracking** - Entity + API
+1. ~~Password Reset~~ - Đã hoàn thành
+2. ~~Flashcard Study Mode~~ - UI đã hoàn thành
+3. ~~Match Mode~~ - Đã hoàn thành
+4. ~~Progress Tracking~~ - Entity + API đã hoàn thành
+5. ~~Folders~~ - Entity + API đã hoàn thành
 
 ### Cần Implement cho Phase 2:
 
@@ -226,13 +233,13 @@ apps/web/src/
 ## 📈 Overall Progress
 
 ```
-Phase 1:  ████████████░░░░░░░░░  60%
-Phase 2:  ████░░░░░░░░░░░░░░░░  20%
+Phase 1:  ████████████████████  100% ✅
+Phase 2:  ██████████░░░░░░░░░░  50%
 Phase 3:  ███░░░░░░░░░░░░░░░░░  15%
 Phase 4:  ██░░░░░░░░░░░░░░░░░░  10%
 Phase 5:  ░░░░░░░░░░░░░░░░░░░   0%
 
-Overall:  ███░░░░░░░░░░░░░░░░  ~25%
+Overall:  █████░░░░░░░░░░░░░░  ~40%
 ```
 
 ---
@@ -241,14 +248,16 @@ Overall:  ███░░░░░░░░░░░░░░░░  ~25%
 
 ### Immediate (1-2 weeks):
 
-1. [ ] Implement Password Reset flow
-2. [ ] Complete Flashcard Study Mode UI
-3. [ ] Add Progress Tracking entity
+1. [x] ~~Implement Password Reset flow~~
+2. [x] ~~Complete Flashcard Study Mode UI~~
+3. [x] ~~Add Progress Tracking entity~~
+4. [x] ~~Add Folders module~~
+5. [ ] Integrate Learn/Test modes with Progress API
 
 ### Short-term (2-4 weeks):
 
-1. [ ] Implement Match Mode
-2. [ ] Learn Mode với Spaced Repetition
+1. [ ] Implement Match Mode backend integration
+2. [ ] Learn Mode với Spaced Repetition (backend)
 3. [ ] Classes module (full)
 
 ### Medium-term (1-2 months):

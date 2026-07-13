@@ -1,14 +1,16 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Clock, Trophy, RotateCcw, X, Check } from 'lucide-react';
 import { Card } from './StudySession';
+import { useProgress } from '@/hooks/useProgress';
 
 interface MatchModeProps {
   cards: Card[];
   title: string;
+  studySetId?: string;
   timeLimit?: number; // in seconds
-  onComplete?: (results: { matches: number; timeSpent: number; mistakes: number }) => void;
+  onComplete?: (results: { matches: number; timeSpent: number; mistakes: number; score: number }) => void;
   onExit?: () => void;
 }
 
@@ -20,7 +22,7 @@ interface MatchItem {
   isMatched: boolean;
 }
 
-export function MatchMode({ cards, title, timeLimit = 60, onComplete, onExit }: MatchModeProps) {
+export function MatchMode({ cards, title, studySetId, timeLimit = 60, onComplete, onExit }: MatchModeProps) {
   const [items, setItems] = useState<MatchItem[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [matches, setMatches] = useState(0);
@@ -30,6 +32,12 @@ export function MatchMode({ cards, title, timeLimit = 60, onComplete, onExit }: 
   const [isStarted, setIsStarted] = useState(false);
   const [timeSpent, setTimeSpent] = useState(0);
   const [showMismatch, setShowMismatch] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const sessionStartRef = useRef<number>(0);
+  
+  const progress = useProgress();
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
 
   // Initialize and shuffle items
   const initializeItems = useCallback(() => {
@@ -61,7 +69,7 @@ export function MatchMode({ cards, title, timeLimit = 60, onComplete, onExit }: 
     return matchItems;
   }, [cards]);
 
-  const startGame = () => {
+  const startGame = async () => {
     setItems(initializeItems());
     setSelectedIds([]);
     setMatches(0);
@@ -70,7 +78,35 @@ export function MatchMode({ cards, title, timeLimit = 60, onComplete, onExit }: 
     setTimeSpent(0);
     setIsComplete(false);
     setIsStarted(true);
+    sessionStartRef.current = Date.now();
+    
+    // Create session on backend
+    const session = await progress.createSession({
+      studySetId,
+      mode: 'match',
+    });
+    if (session) {
+      setSessionId(session.id);
+    }
   };
+
+  // Save results on completion
+  const saveResults = useCallback(async () => {
+    if (sessionId) {
+      const totalTimeSpent = timeLimit > 0 && isComplete && matches < cards.length 
+        ? timeLimit 
+        : timeSpent;
+      const score = cards.length > 0 ? Math.round((matches / cards.length) * 100) : 0;
+      
+      await progress.endSession(sessionId, {
+        cardsStudied: cards.length,
+        correctCount: matches,
+        timeSpentSeconds: totalTimeSpent,
+        mistakes,
+        score,
+      });
+    }
+  }, [sessionId, timeLimit, isComplete, matches, cards.length, timeSpent, mistakes, progress]);
 
   // Timer
   useEffect(() => {
@@ -94,9 +130,17 @@ export function MatchMode({ cards, title, timeLimit = 60, onComplete, onExit }: 
   useEffect(() => {
     if (matches === cards.length && cards.length > 0 && isStarted) {
       setIsComplete(true);
-      onComplete?.({ matches, timeSpent, mistakes });
+      saveResults();
+      onCompleteRef.current?.({ matches, timeSpent, mistakes, score: 100 });
     }
-  }, [matches, cards.length, isStarted, timeSpent, mistakes, onComplete]);
+  }, [matches, cards.length, isStarted, timeSpent, mistakes, saveResults]);
+
+  // Save results when time runs out
+  useEffect(() => {
+    if (isComplete && matches < cards.length && timeLeft === 0 && sessionId) {
+      saveResults();
+    }
+  }, [isComplete, matches, cards.length, timeLeft, sessionId, saveResults]);
 
   const handleSelect = (id: string) => {
     if (showMismatch) return;

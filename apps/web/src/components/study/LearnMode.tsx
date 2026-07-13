@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
-import { Brain, Check, X, ChevronRight, BookOpen, Zap } from 'lucide-react';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { Brain, X, BookOpen, Zap } from 'lucide-react';
 import { Card } from './StudySession';
+import { useProgress } from '@/hooks/useProgress';
 
 interface LearnCard extends Card {
-  easeFactor: number; // SM-2 algorithm: starting at 2.5
-  interval: number; // days until next review
-  repetitions: number; // successful reviews in a row
+  easeFactor: number;
+  interval: number;
+  repetitions: number;
   nextReview: Date;
   lastResult?: 'again' | 'hard' | 'good' | 'easy';
 }
@@ -15,14 +16,15 @@ interface LearnCard extends Card {
 interface LearnModeProps {
   cards: Card[];
   title: string;
-  onComplete?: (results: { mastered: number; learning: number; new: number; accuracy: number }) => void;
+  studySetId?: string;
+  onComplete?: (results: { mastered: number; learning: number; new: number; accuracy: number; timeSpent: number }) => void;
   onExit?: () => void;
 }
 
 const INITIAL_EASE_FACTOR = 2.5;
 const MINIMUM_EASE_FACTOR = 1.3;
 
-export function LearnMode({ cards, title, onComplete, onExit }: LearnModeProps) {
+export function LearnMode({ cards, title, studySetId, onComplete, onExit }: LearnModeProps) {
   const [learnCards, setLearnCards] = useState<LearnCard[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -30,6 +32,10 @@ export function LearnMode({ cards, title, onComplete, onExit }: LearnModeProps) 
   const [isStarted, setIsStarted] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [showAnswer, setShowAnswer] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const sessionStartRef = useRef<number>(0);
+  
+  const progress = useProgress();
 
   // Initialize cards with SM-2 algorithm data
   const initializeCards = useCallback(() => {
@@ -46,7 +52,6 @@ export function LearnMode({ cards, title, onComplete, onExit }: LearnModeProps) 
   const getDueCards = useCallback((allCards: LearnCard[]) => {
     const now = new Date();
     const dueCards = allCards.filter((card) => new Date(card.nextReview) <= now);
-    // Sort by priority: new cards first, then by due date
     return dueCards.sort((a, b) => {
       if (a.repetitions === 0 && b.repetitions > 0) return -1;
       if (b.repetitions === 0 && a.repetitions > 0) return 1;
@@ -54,7 +59,7 @@ export function LearnMode({ cards, title, onComplete, onExit }: LearnModeProps) 
     });
   }, []);
 
-  const startSession = () => {
+  const startSession = async () => {
     const initializedCards = initializeCards();
     setLearnCards(initializedCards);
     setIsStarted(true);
@@ -62,19 +67,26 @@ export function LearnMode({ cards, title, onComplete, onExit }: LearnModeProps) 
     setIsFlipped(false);
     setShowAnswer(false);
     setSessionStats({ again: 0, hard: 0, good: 0, easy: 0 });
+    sessionStartRef.current = Date.now();
+    
+    // Create session on backend
+    const session = await progress.createSession({
+      studySetId,
+      mode: 'learn',
+    });
+    if (session) {
+      setSessionId(session.id);
+    }
   };
 
   // Apply SM-2 algorithm
   const applySpacedRepetition = useCallback((card: LearnCard, quality: number) => {
-    // Quality: 0 = again, 1 = hard, 2 = good, 3 = easy
     let { easeFactor, interval, repetitions } = card;
 
     if (quality < 2) {
-      // Failed - reset
       repetitions = 0;
-      interval = 1; // 1 day
+      interval = 1;
     } else {
-      // Success
       if (repetitions === 0) {
         interval = 1;
       } else if (repetitions === 1) {
@@ -85,11 +97,9 @@ export function LearnMode({ cards, title, onComplete, onExit }: LearnModeProps) 
       repetitions += 1;
     }
 
-    // Update ease factor
     easeFactor = easeFactor + (0.1 - (3 - quality) * (0.08 + (3 - quality) * 0.02));
     if (easeFactor < MINIMUM_EASE_FACTOR) easeFactor = MINIMUM_EASE_FACTOR;
 
-    // Calculate next review date
     const nextReview = new Date();
     nextReview.setDate(nextReview.getDate() + interval);
 
@@ -104,13 +114,21 @@ export function LearnMode({ cards, title, onComplete, onExit }: LearnModeProps) 
   }, []);
 
   const handleAnswer = useCallback((quality: number) => {
+    const currentCard = learnCards[currentIndex];
+    if (!currentCard) return;
+
+    // Send review to backend
+    progress.reviewCard({
+      cardId: currentCard.id,
+      studySessionId: sessionId || undefined,
+      quality,
+    });
+
     setLearnCards((prev) => {
       const updated = [...prev];
-      const currentCard = updated[currentIndex];
       const processedCard = applySpacedRepetition(currentCard, quality);
       updated[currentIndex] = processedCard;
 
-      // Update stats
       setSessionStats((stats) => ({
         ...stats,
         [processedCard.lastResult!]: stats[processedCard.lastResult as keyof typeof stats] + 1,
@@ -120,31 +138,65 @@ export function LearnMode({ cards, title, onComplete, onExit }: LearnModeProps) 
     });
 
     // Move to next card
-    const dueCards = getDueCards(learnCards);
     const currentCardId = learnCards[currentIndex]?.id;
     const remainingCards = learnCards.filter(
       (c) => c.id !== currentCardId && new Date(c.nextReview) <= new Date()
     );
 
     if (remainingCards.length === 0) {
-      // Session complete
-      setTimeout(() => {
+      setTimeout(async () => {
         setIsComplete(true);
-        const mastered = learnCards.filter((c) => c.repetitions >= 3).length;
-        const learning = learnCards.filter((c) => c.repetitions > 0 && c.repetitions < 3).length;
-        const newCards = learnCards.filter((c) => c.repetitions === 0).length;
-        const total = learnCards.length;
-        const accuracy = total > 0 ? Math.round(((sessionStats.good + sessionStats.easy) / total) * 100) : 0;
-        onComplete?.({ mastered, learning, new: newCards, accuracy });
+        
+        // End session on backend
+        if (sessionId) {
+          const timeSpent = Math.floor((Date.now() - sessionStartRef.current) / 1000);
+          const total = learnCards.length;
+          const correctCount = sessionStats.good + sessionStats.easy;
+          const score = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+          
+          await progress.endSession(sessionId, {
+            cardsStudied: total,
+            correctCount,
+            timeSpentSeconds: timeSpent,
+            mistakes: sessionStats.again,
+            score,
+          });
+          
+          const mastered = learnCards.filter((c) => c.repetitions >= 3).length;
+          const learning = learnCards.filter((c) => c.repetitions > 0 && c.repetitions < 3).length;
+          const newCards = learnCards.filter((c) => c.repetitions === 0).length;
+          
+          onComplete?.({ mastered, learning, new: newCards, accuracy: score, timeSpent });
+        }
       }, 500);
     } else {
       setCurrentIndex(learnCards.findIndex((c) => c.id !== currentCardId && new Date(c.nextReview) <= new Date()));
       setIsFlipped(false);
       setShowAnswer(false);
     }
-  }, [currentIndex, learnCards, getDueCards, applySpacedRepetition, sessionStats, onComplete]);
+  }, [currentIndex, learnCards, sessionId, applySpacedRepetition, progress, sessionStats, onComplete]);
 
   const dueCount = getDueCards(learnCards).length;
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isStarted || isComplete) return;
+      
+      if (e.code === 'Space') {
+        e.preventDefault();
+        setShowAnswer(true);
+      } else if (showAnswer) {
+        if (e.key === '1') handleAnswer(0);
+        else if (e.key === '2') handleAnswer(1);
+        else if (e.key === '3') handleAnswer(2);
+        else if (e.key === '4') handleAnswer(3);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isStarted, isComplete, showAnswer, handleAnswer]);
 
   if (!isStarted) {
     return (

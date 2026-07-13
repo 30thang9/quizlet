@@ -1,5 +1,5 @@
 # ===========================================
-# QUIZLET - Docker Compose Example
+# QUIZLET - Docker Compose for Local Development
 # ===========================================
 version: '3.8'
 
@@ -10,9 +10,9 @@ services:
     container_name: quizlet-db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-quizlet}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: quizlet
     ports:
       - "5432:5432"
     volumes:
@@ -50,33 +50,30 @@ services:
       NODE_ENV: production
       PORT: 3000
       API_PREFIX: /v1
-      CORS_ORIGINS: http://web:4000
+      CORS_ORIGINS: http://localhost:4000,http://localhost:3000
       THROTTLE_TTL: 60000
       THROTTLE_LIMIT: 100
       
       DB_HOST: db
       DB_PORT: 5432
-      DB_USERNAME: ${POSTGRES_USER:-postgres}
-      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      DB_DATABASE: ${POSTGRES_DB:-quizlet}
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_DATABASE: quizlet
       
       REDIS_URL: redis://redis:6379
       
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_SECRET: dev-jwt-secret-key-at-least-32-characters-long-for-security
+      JWT_REFRESH_SECRET: dev-refresh-secret-key-at-least-32-characters-long-for-security
+      JWT_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
       
-      # AI Providers
-      AI_PROVIDER: ${AI_PROVIDER:-openai}
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
-      GEMINI_API_KEY: ${GEMINI_API_KEY}
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      # AI Providers (mock for local dev)
+      AI_PROVIDER: mock
       
-      # Email Service
-      EMAIL_PROVIDER: ${EMAIL_PROVIDER:-mock}
-      EMAIL_FROM: ${EMAIL_FROM:-noreply@quizlet.com}
-      RESEND_API_KEY: ${RESEND_API_KEY}
-      SENDGRID_API_KEY: ${SENDGRID_API_KEY}
-      APP_URL: ${APP_URL:-http://localhost:3000}
+      # Email Service (mock for local dev)
+      EMAIL_PROVIDER: mock
+      EMAIL_FROM: noreply@quizlet.com
+      APP_URL: http://localhost:3000
       APP_NAME: Quizlet
       
       SWAGGER_ENABLED: "true"
@@ -98,7 +95,7 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_API_URL: http://api:3000/v1
+      NEXT_PUBLIC_API_URL: http://localhost:3000/v1
       API_TIMEOUT: 30000
       AUTH_TOKEN_KEY: accessToken
       AUTH_REFRESH_KEY: refreshToken

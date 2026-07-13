@@ -15,6 +15,9 @@ import { VersionsModule } from './modules/versions/versions.module';
 import { DiagramsModule } from './modules/diagrams/diagrams.module';
 import { AiModule } from './modules/ai/ai.module';
 import { MediaModule } from './modules/media/media.module';
+import { ProgressModule } from './modules/progress/progress.module';
+import { FoldersModule } from './modules/folders/folders.module';
+import { EmailModule } from './modules/email/email.module';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -66,6 +69,9 @@ import { HealthController } from './health.controller';
     DiagramsModule,
     AiModule,
     MediaModule,
+    ProgressModule,
+    FoldersModule,
+    EmailModule,
   ],
   controllers: [HealthController],
 })

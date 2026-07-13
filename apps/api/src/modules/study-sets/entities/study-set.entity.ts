@@ -22,6 +22,7 @@ export enum StudySetVisibility {
 @Index(['userId'])
 @Index(['visibility'])
 @Index(['isPublished'])
+@Index(['folderId'])
 export class StudySet {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -32,6 +33,9 @@ export class StudySet {
   @ManyToOne(() => User)
   @JoinColumn({ name: 'user_id' })
   user: User;
+
+  @Column({ nullable: true, name: 'folder_id' })
+  folderId?: string;
 
   @Column()
   title: string;

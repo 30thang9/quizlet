@@ -7,7 +7,8 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/entities/user.entity';
-import { RegisterDto, LoginDto } from './dto';
+import { EmailService } from '../email/email.service';
+import { RegisterDto, LoginDto, ForgotPasswordDto, ResetPasswordDto } from './dto';
 
 export interface JwtPayload {
   sub: string;
@@ -27,6 +28,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly emailService: EmailService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -78,6 +80,33 @@ export class AuthService {
     } catch {
       throw new UnauthorizedException('Invalid refresh token');
     }
+  }
+
+  async forgotPassword(dto: ForgotPasswordDto): Promise<{ success: boolean }> {
+    const result = await this.usersService.createPasswordResetToken(dto.email);
+    
+    if (result) {
+      const appUrl = this.configService.get('APP_URL', 'http://localhost:3000');
+      const resetUrl = `${appUrl}/auth/reset-password?token=${result.token}`;
+      
+      await this.emailService.sendPasswordResetEmail({
+        email: dto.email,
+        name: '',
+        resetUrl,
+      });
+    }
+
+    return { success: true };
+  }
+
+  async resetPassword(dto: ResetPasswordDto): Promise<{ success: boolean }> {
+    const user = await this.usersService.resetPassword(dto.token, dto.newPassword);
+    
+    if (!user) {
+      throw new BadRequestException('Invalid or expired reset token');
+    }
+
+    return { success: true };
   }
 
   async generateTokens(user: User): Promise<TokenPair> {
