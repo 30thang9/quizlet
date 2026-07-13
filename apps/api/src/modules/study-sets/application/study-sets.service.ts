@@ -92,10 +92,10 @@ export class StudySetsService {
     const studySet = new StudySet();
     studySet.userId = data.userId;
     studySet.title = data.title;
-    studySet.description = data.description;
+    studySet.description = data.description || '';
     studySet.visibility = data.visibility || Visibility.PUBLIC;
-    studySet.language = data.language;
-    studySet.subject = data.subject;
+    studySet.language = data.language || '';
+    studySet.subject = data.subject || '';
     studySet.cardCount = 0;
     studySet.viewCount = 0;
     studySet.likeCount = 0;
@@ -143,6 +143,10 @@ export class StudySetsService {
     card.audioUrl = data.audioUrl;
     card.position = position;
     card.isStarred = false;
+    card.memoryScore = 0;
+    card.easeFactor = 2.5;
+    card.intervalDays = 0;
+    card.repetitions = 0;
 
     const savedCard = await this.cardsRepository.save(card);
 
@@ -167,6 +171,10 @@ export class StudySetsService {
       entity.audioUrl = card.audioUrl;
       entity.position = startPosition + index;
       entity.isStarred = false;
+      entity.memoryScore = 0;
+      entity.easeFactor = 2.5;
+      entity.intervalDays = 0;
+      entity.repetitions = 0;
       return entity;
     });
 

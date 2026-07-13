@@ -5,7 +5,6 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
-  OneToMany,
   JoinColumn,
   Index,
 } from 'typeorm';
@@ -32,13 +31,13 @@ export class StudySet {
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'user_id' })
-  user: User;
+  user?: User;
 
   @Column({ type: 'varchar', length: 500 })
   title: string;
 
   @Column({ type: 'text', nullable: true })
-  description: string;
+  description?: string;
 
   @Column({
     type: 'enum',
@@ -48,13 +47,13 @@ export class StudySet {
   visibility: Visibility;
 
   @Column({ type: 'varchar', length: 255, nullable: true, name: 'password_hash' })
-  passwordHash: string;
+  passwordHash?: string;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
-  language: string;
+  language?: string;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
-  subject: string;
+  subject?: string;
 
   // Denormalized stats
   @Column({ type: 'integer', default: 0, name: 'card_count' })
@@ -76,7 +75,7 @@ export class StudySet {
   updatedAt: Date;
 
   @Column({ type: 'timestamp', nullable: true, name: 'deleted_at' })
-  deletedAt: Date;
+  deletedAt?: Date;
 
   // Helper methods
   isPublic(): boolean {

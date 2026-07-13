@@ -29,13 +29,13 @@ export class User {
   passwordHash: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
-  name: string;
+  name?: string;
 
   @Column({ type: 'varchar', length: 500, nullable: true, name: 'avatar_url' })
-  avatarUrl: string;
+  avatarUrl?: string;
 
   @Column({ type: 'text', nullable: true })
-  bio: string;
+  bio?: string;
 
   @Column({
     type: 'enum',
@@ -45,7 +45,7 @@ export class User {
   role: UserRole;
 
   @Column({ type: 'timestamp', nullable: true, name: 'email_verified_at' })
-  emailVerifiedAt: Date;
+  emailVerifiedAt?: Date;
 
   @Column({ type: 'boolean', default: false, name: 'is_active' })
   isActive: boolean;
@@ -54,7 +54,7 @@ export class User {
   failedLoginAttempts: number;
 
   @Column({ type: 'timestamp', nullable: true, name: 'locked_until' })
-  lockedUntil: Date;
+  lockedUntil?: Date;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
@@ -63,10 +63,10 @@ export class User {
   updatedAt: Date;
 
   @DeleteDateColumn({ name: 'deleted_at' })
-  deletedAt: Date;
+  deletedAt?: Date;
 
   isLocked(): boolean {
-    return this.lockedUntil && this.lockedUntil > new Date();
+    return this.lockedUntil !== undefined && this.lockedUntil !== null && this.lockedUntil > new Date();
   }
 
   isTeacher(): boolean {

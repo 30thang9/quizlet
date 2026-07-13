@@ -82,29 +82,29 @@ export default function MainLayout({
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-white">
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed left-0 top-0 z-40 h-screen w-64 border-r bg-card transition-transform duration-300',
+          'fixed left-0 top-0 z-40 h-screen w-64 border-r bg-white transition-transform duration-300',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="h-16 flex items-center justify-between px-6 border-b">
-            <Link href="/dashboard" className="text-xl font-bold text-primary">
+            <Link href="/dashboard" className="text-xl font-bold text-sky-500">
               Quizlet
             </Link>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden p-2 hover:bg-accent rounded-lg"
+              className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
             >
               <X className="w-5 h-5" />
             </button>
@@ -121,8 +121,8 @@ export default function MainLayout({
                   className={cn(
                     'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors',
                     isActive
-                      ? 'bg-primary text-white'
-                      : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+                      ? 'bg-sky-500 text-white'
+                      : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'
                   )}
                 >
                   <item.icon className="w-5 h-5" />
@@ -135,19 +135,19 @@ export default function MainLayout({
           {/* User */}
           <div className="p-4 border-t">
             <div className="flex items-center gap-3 px-4 py-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="text-sm font-medium text-primary">
+              <div className="w-10 h-10 rounded-full bg-sky-100 flex items-center justify-center">
+                <span className="text-sm font-medium text-sky-500">
                   {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{user?.name}</p>
-                <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                <p className="text-xs text-gray-500 truncate">{user?.email}</p>
               </div>
             </div>
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-3 mt-2 text-sm font-medium text-muted-foreground hover:bg-accent rounded-lg transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-3 mt-2 text-sm font-medium text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <LogOut className="w-5 h-5" />
               Log out
@@ -164,21 +164,21 @@ export default function MainLayout({
         )}
       >
         {/* Header */}
-        <header className="h-16 border-b bg-card sticky top-0 z-30">
+        <header className="h-16 border-b bg-white sticky top-0 z-30">
           <div className="h-full flex items-center justify-between px-6">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 hover:bg-accent rounded-lg lg:hidden"
+                className="p-2 hover:bg-gray-100 rounded-lg lg:hidden"
               >
                 <Menu className="w-5 h-5" />
               </button>
               <div className="relative hidden md:block">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   type="text"
                   placeholder="Search study sets..."
-                  className="w-80 pl-10 pr-4 py-2 bg-accent border-0 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-80 pl-10 pr-4 py-2 bg-gray-100 border-0 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
                 />
               </div>
             </div>

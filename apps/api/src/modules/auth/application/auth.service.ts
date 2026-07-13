@@ -21,9 +21,9 @@ export interface AuthUser {
   user: {
     id: string;
     email: string;
-    name: string;
+    name?: string;
     role: string;
-    avatarUrl: string | null;
+    avatarUrl?: string;
   };
   tokens: AuthTokens;
 }
