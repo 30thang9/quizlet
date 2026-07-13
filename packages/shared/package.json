@@ -1,0 +1,11 @@
+{
+  "name": "@quizlet/shared",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "types": "index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./domain": "./domain/index.ts",
+    "./domain/*": "./domain/*.ts"
+  }
+}
