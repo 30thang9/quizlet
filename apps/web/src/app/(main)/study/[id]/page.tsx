@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, BookOpen, Zap, Brain, FileText } from 'lucide-react';
-import { StudySession, MatchMode, Card } from '@/components/study';
+import { StudySession, MatchMode, LearnMode, TestMode, Card } from '@/components/study';
 
 // Demo data - in production this would come from API
 const demoStudySet = {
@@ -30,7 +30,7 @@ type StudyMode = 'cards' | 'match' | 'learn' | 'test' | null;
 export default function StudyPage() {
   const params = useParams();
   const router = useRouter();
-  const [studySet, setStudySet] = useState(demoStudySet);
+  const [studySet] = useState(demoStudySet);
   const [mode, setMode] = useState<StudyMode>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -68,26 +68,25 @@ export default function StudyPage() {
     );
   }
 
-  // Learn and Test modes would be implemented similarly
-  if (mode === 'learn' || mode === 'test') {
+  if (mode === 'learn') {
     return (
-      <div className="flex flex-col items-center justify-center min-h-96">
-        <div className="text-center">
-          <Brain className="w-16 h-16 text-sky-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold mb-2">
-            {mode === 'learn' ? 'Learn Mode' : 'Test Mode'}
-          </h2>
-          <p className="text-gray-600 mb-6">
-            This mode is coming soon!
-          </p>
-          <button
-            onClick={() => setMode(null)}
-            className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
-          >
-            Go Back
-          </button>
-        </div>
-      </div>
+      <LearnMode
+        cards={studySet.cards}
+        title={studySet.title}
+        onExit={() => setMode(null)}
+      />
+    );
+  }
+
+  if (mode === 'test') {
+    return (
+      <TestMode
+        cards={studySet.cards}
+        title={studySet.title}
+        questionCount={10}
+        timeLimit={120}
+        onExit={() => setMode(null)}
+      />
     );
   }
 
