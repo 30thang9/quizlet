@@ -10,6 +10,8 @@ import { CardsModule } from './modules/cards/cards.module';
 import { TagsModule } from './modules/tags/tags.module';
 import { SearchModule } from './modules/search/search.module';
 import { CommentsModule } from './modules/comments/comments.module';
+import { ClassesModule } from './modules/classes/classes.module';
+import { VersionsModule } from './modules/versions/versions.module';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -55,6 +57,8 @@ import { HealthController } from './health.controller';
     TagsModule,
     SearchModule,
     CommentsModule,
+    ClassesModule,
+    VersionsModule,
   ],
   controllers: [HealthController],
 })
