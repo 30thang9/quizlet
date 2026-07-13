@@ -14,6 +14,7 @@ import { ClassesModule } from './modules/classes/classes.module';
 import { VersionsModule } from './modules/versions/versions.module';
 import { DiagramsModule } from './modules/diagrams/diagrams.module';
 import { AiModule } from './modules/ai/ai.module';
+import { MediaModule } from './modules/media/media.module';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -64,6 +65,7 @@ import { HealthController } from './health.controller';
     VersionsModule,
     DiagramsModule,
     AiModule,
+    MediaModule,
   ],
   controllers: [HealthController],
 })

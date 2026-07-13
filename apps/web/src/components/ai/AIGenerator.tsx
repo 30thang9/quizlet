@@ -46,7 +46,7 @@ export function AIGenerator({ onAddCards, onClose }: AIGeneratorProps) {
         includeHints,
         provider,
       } as any);
-      setCards(result);
+      setCards(result as GeneratedCard[]);
     } catch (err: any) {
       setError(err?.message || 'Failed to generate flashcards');
     } finally {
