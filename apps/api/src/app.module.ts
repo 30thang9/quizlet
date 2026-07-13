@@ -44,12 +44,13 @@ import { HealthController } from './health.controller';
     }),
 
     // Rate limiting
-    ThrottlerModule.forRoot([
-      {
-        ttl: 60000,
-        limit: 100,
-      },
-    ]),
+    ThrottlerModule.forRootAsync({
+      useFactory: (config: ConfigService) => ([{
+        ttl: config.get<number>('THROTTLE_TTL', 60000),
+        limit: config.get<number>('THROTTLE_LIMIT', 100),
+      }]),
+      inject: [ConfigService],
+    }),
 
     // Feature modules
     AuthModule,
