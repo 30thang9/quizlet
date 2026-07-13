@@ -1,16 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ClassesService } from './application/classes.service';
-import { ClassesController } from './presentation/controllers/classes.controller';
-import {
-  ClassEntity,
-  ClassMember,
-  Assignment,
-  AssignmentProgress,
-} from './domain/entities/class.entity';
+import { ClassesController } from './classes.controller';
+import { ClassesService } from './classes.service';
+import { Class } from './entities/class.entity';
+import { ClassMember } from './entities/class-member.entity';
+import { ClassStudySet } from './entities/class-study-set.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ClassEntity, ClassMember, Assignment, AssignmentProgress])],
+  imports: [TypeOrmModule.forFeature([Class, ClassMember, ClassStudySet])],
   controllers: [ClassesController],
   providers: [ClassesService],
   exports: [ClassesService],

@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { SearchService } from './application/search.service';
-import { SearchController } from './presentation/controllers/search.controller';
-import { StudySet } from '../study-sets/domain/entities/study-set.entity';
-import { User } from '../users/domain/entities/user.entity';
-import { Tag } from '../tags/domain/entities/tag.entity';
+import { SearchController } from './search.controller';
+import { SearchService } from './search.service';
+import { StudySet } from '../study-sets/entities/study-set.entity';
+import { User } from '../users/entities/user.entity';
+import { Tag } from '../tags/entities/tag.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([StudySet, User, Tag])],

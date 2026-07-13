@@ -10,8 +10,9 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { MediaService } from './application/media.service';
+import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { MediaService } from './media.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 class GetUploadUrlDto {
   fileName: string;
@@ -23,8 +24,10 @@ class DeleteFileDto {
   key: string;
 }
 
+@ApiTags('Media')
 @Controller('media')
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class MediaController {
   constructor(private readonly mediaService: MediaService) {}
 

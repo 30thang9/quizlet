@@ -1,32 +1,18 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { StudySetEntity } from './infrastructure/persistence/entities/study-set.entity';
-import { CardEntity } from '../cards/domain/entities/card.entity';
-import { StudySetsService, IStudySetsRepository, ICardsRepository } from './application/study-sets.service';
-import { StudySetsRepository } from './infrastructure/persistence/study-sets.repository';
-import { CardsRepository } from './infrastructure/persistence/cards.repository';
-import { StudySetsController } from './presentation/controllers/study-sets.controller';
+import { StudySetsController } from './study-sets.controller';
+import { StudySetsService } from './study-sets.service';
+import { StudySet } from './entities/study-set.entity';
+import { Card } from './entities/card.entity';
 import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([StudySetEntity, CardEntity]),
+    TypeOrmModule.forFeature([StudySet, Card]),
     forwardRef(() => AuthModule),
   ],
   controllers: [StudySetsController],
-  providers: [
-    StudySetsService,
-    StudySetsRepository,
-    CardsRepository,
-    {
-      provide: IStudySetsRepository,
-      useClass: StudySetsRepository,
-    },
-    {
-      provide: ICardsRepository,
-      useClass: CardsRepository,
-    },
-  ],
-  exports: [StudySetsService, IStudySetsRepository, ICardsRepository],
+  providers: [StudySetsService],
+  exports: [StudySetsService],
 })
 export class StudySetsModule {}

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { AiService } from './application/ai.service';
-import { AiController } from './presentation/controllers/ai.controller';
+import { AiController } from './ai.controller';
+import { AiService } from './ai.service';
 
 @Module({
   imports: [ConfigModule],
