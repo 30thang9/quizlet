@@ -1,21 +1,20 @@
-# 04 - Frontend Architecture (Next.js)
+# 04 - Frontend Architecture (Next.js App Router)
 
 ## 🎯 Tech Stack
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    FRONTEND TECH STACK                           │
+│                    FRONTEND TECH STACK                            │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│  Framework      │ Next.js 14 (App Router)                      │
+│  Framework      │ Next.js 14+ (App Router)                     │
 │  Language       │ TypeScript 5.x                               │
-│  Styling        │ Tailwind CSS + CSS Modules                    │
-│  State          │ Zustand + React Query (TanStack)             │
-│  Forms          │ React Hook Form + Zod                        │
-│  UI Components  │ shadcn/ui + Radix primitives                 │
-│  Animation      │ Framer Motion                                 │
-│  Testing        │ Jest + React Testing Library + Playwright     │
-│  i18n           │ next-intl                                    │
+│  Styling        │ Tailwind CSS + CSS Modules                   │
+│  State          │ React Context + Zustand (optional)           │
+│  Forms          │ React Hook Form + Zod                       │
+│  Data Fetching  │ Server Components + TanStack Query           │
+│  UI Components  │ shadcn/ui (Radix + Tailwind)                │
+│  Testing        │ Vitest + React Testing Library + Playwright │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -27,648 +26,566 @@
 ```
 apps/web/
 ├── src/
-│   ├── app/                      # Next.js App Router
-│   │   ├── (auth)/              # Auth layout group
+│   ├── app/                        # App Router - Routing only
+│   │   ├── (auth)/                 # Route group - Authentication
 │   │   │   ├── login/
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── loading.tsx
 │   │   │   ├── register/
-│   │   │   └── forgot-password/
+│   │   │   │   └── page.tsx
+│   │   │   └── layout.tsx
 │   │   │
-│   │   ├── (main)/              # Main layout group
-│   │   │   ├── layout.tsx       # Main layout with sidebar
-│   │   │   ├── dashboard/
-│   │   │   ├── library/
-│   │   │   ├── sets/
+│   │   ├── (main)/                 # Route group - Main app
+│   │   │   ├── (dashboard)/
+│   │   │   │   ├── page.tsx        # /dashboard
+│   │   │   │   ├── loading.tsx
+│   │   │   │   └── _components/    # Route-local components
+│   │   │   │
+│   │   │   ├── study-sets/
+│   │   │   │   ├── page.tsx        # /study-sets
+│   │   │   │   ├── [id]/
+│   │   │   │   │   ├── page.tsx    # /study-sets/:id
+│   │   │   │   │   └── edit/
+│   │   │   │   │       └── page.tsx
+│   │   │   │   └── create/
+│   │   │   │       └── page.tsx
+│   │   │   │
 │   │   │   ├── classes/
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── [id]/
+│   │   │   │       └── page.tsx
+│   │   │   │
 │   │   │   ├── study/
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── [id]/
+│   │   │   │       └── page.tsx
+│   │   │   │
 │   │   │   └── profile/
+│   │   │       └── page.tsx
 │   │   │
-│   │   ├── (study)/             # Study mode layouts
-│   │   │   ├── learn/[setId]/
-│   │   │   ├── match/[setId]/
-│   │   │   └── test/[setId]/
+│   │   ├── layout.tsx              # Root layout
+│   │   ├── page.tsx               # Home page (/)
+│   │   ├── loading.tsx            # Root loading
+│   │   ├── error.tsx              # Root error boundary
+│   │   ├── not-found.tsx          # Root 404
 │   │   │
-│   │   ├── (classroom)/         # Teacher layouts
-│   │   │   ├── teach/
-│   │   │   └── live/
-│   │   │
-│   │   ├── api/                  # API routes (if needed)
-│   │   │
-│   │   ├── layout.tsx           # Root layout
-│   │   ├── page.tsx             # Home page
-│   │   └── globals.css          # Global styles
+│   │   └── api/                    # API routes (BFF pattern)
+│   │       ├── auth/
+│   │       │   └── [...nextauth]/
+│   │       │       └── route.ts
+│   │       └── proxy/
+│   │           └── route.ts
 │   │
-│   ├── components/              # Shared components
-│   │   ├── ui/                  # Base UI components (shadcn)
+│   ├── components/                 # Shared UI components
+│   │   ├── ui/                    # shadcn/ui atomic components
 │   │   │   ├── button.tsx
+│   │   │   ├── input.tsx
 │   │   │   ├── card.tsx
 │   │   │   ├── dialog.tsx
+│   │   │   ├── dropdown-menu.tsx
+│   │   │   ├── form.tsx
+│   │   │   ├── badge.tsx
 │   │   │   └── ...
 │   │   │
-│   │   ├── layout/              # Layout components
+│   │   ├── layout/                # Layout components
 │   │   │   ├── header.tsx
 │   │   │   ├── sidebar.tsx
 │   │   │   ├── footer.tsx
-│   │   │   └── mobile-nav.tsx
+│   │   │   └── navbar.tsx
 │   │   │
-│   │   ├── flashcards/           # Flashcard components
+│   │   ├── auth/                  # Auth-related components
+│   │   │   ├── login-form.tsx
+│   │   │   ├── register-form.tsx
+│   │   │   └── social-login.tsx
+│   │   │
+│   │   ├── study/                 # Study-related components
 │   │   │   ├── flashcard.tsx
-│   │   │   ├── flashcard-grid.tsx
+│   │   │   ├── flashcard-deck.tsx
+│   │   │   ├── quiz-mode.tsx
+│   │   │   └── progress-bar.tsx
+│   │   │
+│   │   ├── study-sets/            # Study set components
+│   │   │   ├── study-set-card.tsx
+│   │   │   ├── study-set-grid.tsx
 │   │   │   └── card-editor.tsx
 │   │   │
-│   │   └── common/              # Common components
-│   │       ├── avatar.tsx
-│   │       ├── badge.tsx
-│   │       └── skeleton.tsx
+│   │   ├── search/                # Search components
+│   │   │   ├── search-bar.tsx
+│   │   │   └── search-results.tsx
+│   │   │
+│   │   ├── comments/              # Comment components
+│   │   │   ├── comment-list.tsx
+│   │   │   ├── comment-item.tsx
+│   │   │   └── comment-form.tsx
+│   │   │
+│   │   ├── tags/                  # Tag components
+│   │   │   ├── tag-list.tsx
+│   │   │   └── tag-input.tsx
+│   │   │
+│   │   ├── diagrams/              # Diagram components
+│   │   │   └── diagram-viewer.tsx
+│   │   │
+│   │   ├── media/                 # Media components
+│   │   │   ├── image-upload.tsx
+│   │   │   └── file-preview.tsx
+│   │   │
+│   │   └── ai/                    # AI components
+│   │       ├── ai-generator.tsx
+│   │       └── smart-suggestions.tsx
 │   │
-│   ├── features/                # Feature-based modules
-│   │   ├── auth/
-│   │   │   ├── components/
-│   │   │   ├── hooks/
-│   │   │   └── api/
-│   │   │
-│   │   ├── study-sets/
-│   │   │   ├── components/
-│   │   │   ├── hooks/
-│   │   │   ├── api/
-│   │   │   └── types/
-│   │   │
-│   │   ├── study/
-│   │   │   ├── learn/
-│   │   │   ├── match/
-│   │   │   ├── test/
+│   ├── hooks/                     # Global custom hooks
+│   │   ├── index.ts
+│   │   ├── useApi.ts              # API fetching hook
+│   │   ├── useAuth.ts             # Auth context hook
+│   │   ├── useDebounce.ts
+│   │   ├── useLocalStorage.ts
+│   │   └── useMediaQuery.ts
+│   │
+│   ├── lib/                       # Utilities & configurations
+│   │   ├── api/                   # API client
+│   │   │   ├── client.ts          # Axios/fetch client
+│   │   │   ├── auth.ts            # Auth API
+│   │   │   ├── study-sets.ts      # Study sets API
+│   │   │   ├── users.ts           # Users API
 │   │   │   └── ...
 │   │   │
-│   │   ├── classes/
-│   │   │   ├── components/
-│   │   │   ├── hooks/
+│   │   ├── utils/                 # Utility functions
+│   │   │   ├── cn.ts              # classnames utility
+│   │   │   ├── formatDate.ts
 │   │   │   └── ...
 │   │   │
-│   │   └── ... (other features)
-│   │
-│   ├── hooks/                    # Global hooks
-│   │   ├── use-auth.ts
-│   │   ├── use-user.ts
-│   │   └── use-toast.ts
-│   │
-│   ├── lib/                      # Utilities
-│   │   ├── api/
-│   │   │   ├── client.ts        # Axios/Fetch client
-│   │   │   ├── endpoints.ts     # API endpoints
-│   │   │   └── types.ts         # API types
-│   │   │
-│   │   ├── utils/
-│   │   │   ├── cn.ts            # Class name utility
-│   │   │   ├── format.ts        # Date, number formatters
-│   │   │   └── validation.ts     # Zod schemas
+│   │   ├── validations/           # Zod schemas
+│   │   │   ├── auth.schema.ts
+│   │   │   ├── study-set.schema.ts
+│   │   │   └── ...
 │   │   │
 │   │   └── constants.ts
 │   │
-│   ├── stores/                  # Zustand stores
-│   │   ├── auth-store.ts
-│   │   ├── ui-store.ts
-│   │   └── study-store.ts
+│   ├── types/                     # Global TypeScript types
+│   │   ├── api/                   # API response types
+│   │   │   ├── auth.types.ts
+│   │   │   ├── study-set.types.ts
+│   │   │   └── ...
+│   │   │
+│   │   ├── index.ts
+│   │   └── global.d.ts
 │   │
-│   └── types/                    # Global types
-│       ├── next.d.ts
-│       └── global.d.ts
+│   ├── providers.tsx              # React providers (optional)
+│   └── styles/
+│       └── globals.css            # Global styles + Tailwind
 │
-├── public/                       # Static assets
-├── tests/                        # E2E tests
-├── .env.local                   # Environment variables
-├── next.config.js
+├── public/                        # Static assets
+│   ├── images/
+│   ├── fonts/
+│   └── favicon.ico
+│
+├── components.json                # shadcn/ui config
 ├── tailwind.config.ts
 ├── tsconfig.json
+├── next.config.js
+├── vitest.config.ts
 └── package.json
 ```
 
 ---
 
-## 🏗️ Feature Module Structure
+## 🏗️ Key Concepts
 
-### Feature-Based Architecture
+### App Router vs Pages Router
+
 ```
-features/
-├── study-sets/
-│   ├── components/
-│   │   ├── StudySetCard.tsx
-│   │   ├── StudySetList.tsx
-│   │   ├── StudySetForm.tsx
-│   │   ├── StudySetDetail.tsx
-│   │   └── ...
-│   │
-│   ├── hooks/
-│   │   ├── useStudySets.ts       # React Query hooks
-│   │   ├── useStudySet.ts
-│   │   └── useCreateStudySet.ts
-│   │
-│   ├── api/
-│   │   ├── studySets.api.ts      # API functions
-│   │   └── studySets.query.ts    # Query keys
-│   │
-│   ├── types/
-│   │   └── study-set.types.ts    # Feature types
-│   │
-│   ├── constants/
-│   │   └── study-sets.constants.ts
-│   │
-│   └── index.ts                  # Public exports
+Pages Router (legacy)          App Router (recommended)
+─────────────────────         ───────────────────────
+pages/                        app/
+├── api/                      ├── page.tsx
+├── _app.tsx                  ├── layout.tsx
+└── _document.tsx             └── loading.tsx/error.tsx
+
+- Client Components           - Server Components (default)
+- getServerSideProps          - async page.tsx
+- getStaticProps              - generateStaticParams
 ```
 
-### Barrel Export Pattern
+### Route Groups
+
 ```typescript
-// features/study-sets/index.ts
-export * from './components';
-export * from './hooks';
-export * from './types';
+// (auth)/login/page.tsx     → URL: /login
+// (main)/dashboard/page.tsx  → URL: /dashboard
+
+// Route groups don't affect URL
+// Used for grouping layouts and shared UI
+```
+
+### Server vs Client Components
+
+```typescript
+// app/dashboard/page.tsx - Server Component (default)
+// No 'use client' directive needed
+
+export default async function DashboardPage() {
+  const data = await fetchData(); // Direct DB/API call
+  return <div>{data.title}</div>;
+}
+```
+
+```typescript
+// components/counter.tsx - Client Component
+'use client';
+
+import { useState } from 'react';
+
+export function Counter() {
+  const [count, setCount] = useState(0);
+  return (
+    <button onClick={() => setCount(c => c + 1)}>
+      Count: {count}
+    </button>
+  );
+}
 ```
 
 ---
 
-## 🔄 State Management
+## 📝 Component Patterns
 
-### 1. Server State (React Query)
+### shadcn/ui Component
+
 ```typescript
-// lib/api/studySets.api.ts
-import { apiClient } from '@/lib/api/client';
+// components/ui/button.tsx
+import { ButtonHTMLAttributes, forwardRef } from 'react';
+import { cn } from '@/lib/utils';
+
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+  size?: 'default' | 'sm' | 'lg' | 'icon';
+}
+
+const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant = 'default', size = 'default', ...props }, ref) => {
+    return (
+      <button
+        className={cn(
+          'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors',
+          'focus-visible:outline-none focus-visible:ring-2',
+          'disabled:pointer-events-none disabled:opacity-50',
+          // Variants
+          variant === 'default' && 'bg-primary text-primary-foreground hover:bg-primary/90',
+          variant === 'destructive' && 'bg-destructive text-destructive-foreground',
+          // Sizes
+          size === 'default' && 'h-10 px-4 py-2',
+          size === 'sm' && 'h-9 rounded-md px-3',
+          size === 'lg' && 'h-11 rounded-md px-8',
+          className
+        )}
+        ref={ref}
+        {...props}
+      />
+    );
+  }
+);
+
+Button.displayName = 'Button';
+export { Button };
+```
+
+### Feature Component
+
+```typescript
+// components/study-sets/study-set-card.tsx
+'use client';
+
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { StudySet } from '@/types/api';
+
+interface StudySetCardProps {
+  studySet: StudySet;
+  onEdit?: (id: string) => void;
+  onDelete?: (id: string) => void;
+}
+
+export function StudySetCard({ studySet, onEdit, onDelete }: StudySetCardProps) {
+  return (
+    <Card className="hover:shadow-lg transition-shadow">
+      <CardHeader>
+        <h3 className="font-semibold">{studySet.title}</h3>
+        <Badge variant="secondary">{studySet.cardsCount} cards</Badge>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-muted-foreground">
+          {studySet.description}
+        </p>
+      </CardContent>
+      <CardFooter className="flex gap-2">
+        <Button variant="outline" size="sm" onClick={() => onEdit?.(studySet.id)}>
+          Edit
+        </Button>
+        <Button variant="destructive" size="sm" onClick={() => onDelete?.(studySet.id)}>
+          Delete
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+}
+```
+
+### Layout Component
+
+```typescript
+// components/layout/header.tsx
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+
+export function Header() {
+  return (
+    <header className="border-b">
+      <div className="container flex h-16 items-center justify-between">
+        <Link href="/" className="font-bold text-xl">
+          Quizlet Clone
+        </Link>
+        
+        <nav className="flex items-center gap-4">
+          <Link href="/study-sets">
+            <Button variant="ghost">Study Sets</Button>
+          </Link>
+          <Link href="/classes">
+            <Button variant="ghost">Classes</Button>
+          </Link>
+          <Link href="/dashboard">
+            <Button>Get Started</Button>
+          </Link>
+        </nav>
+      </div>
+    </header>
+  );
+}
+```
+
+---
+
+## 🎣 Hook Patterns
+
+### API Hook
+
+```typescript
+// hooks/useApi.ts
+import { useState, useCallback } from 'react';
+
+interface UseApiState<T> {
+  data: T | null;
+  loading: boolean;
+  error: Error | null;
+}
+
+export function useApi<T>(apiFunction: () => Promise<T>) {
+  const [state, setState] = useState<UseApiState<T>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(async () => {
+    setState({ data: null, loading: true, error: null });
+    try {
+      const data = await apiFunction();
+      setState({ data, loading: false, error: null });
+    } catch (error) {
+      setState({ data: null, loading: false, error: error as Error });
+    }
+  }, [apiFunction]);
+
+  return { ...state, execute };
+}
+```
+
+### Auth Hook
+
+```typescript
+// hooks/useAuth.ts
+import { useContext } from 'react';
+import { AuthContext } from '@/providers/auth-provider';
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider');
+  }
+  
+  return context;
+}
+
+// Usage
+// const { user, login, logout, isLoading } = useAuth();
+```
+
+---
+
+## 📡 API Client Pattern
+
+```typescript
+// lib/api/client.ts
+import axios from 'axios';
+
+const apiClient = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Request interceptor for auth token
+apiClient.interceptors.request.use((config) => {
+  const token = typeof window !== 'undefined' 
+    ? localStorage.getItem('accessToken') 
+    : null;
+  
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  
+  return config;
+});
+
+// Response interceptor for token refresh
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+    
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      
+      try {
+        const refreshToken = localStorage.getItem('refreshToken');
+        const { data } = await axios.post('/api/auth/refresh', { refreshToken });
+        
+        localStorage.setItem('accessToken', data.accessToken);
+        originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
+        
+        return apiClient(originalRequest);
+      } catch (refreshError) {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        window.location.href = '/login';
+      }
+    }
+    
+    return Promise.reject(error);
+  }
+);
+
+export default apiClient;
+```
+
+```typescript
+// lib/api/study-sets.ts
+import apiClient from './client';
+import { StudySet, CreateStudySetDto, UpdateStudySetDto } from '@/types/api';
 
 export const studySetsApi = {
-  getAll: async (params: GetStudySetsParams) => {
-    const { data } = await apiClient.get<PaginatedResponse<StudySet>>(
+  list: async (params?: { page?: number; limit?: number }) => {
+    const { data } = await apiClient.get<{ data: StudySet[]; total: number }>(
       '/study-sets',
       { params }
     );
     return data;
   },
-  
+
   getById: async (id: string) => {
     const { data } = await apiClient.get<StudySet>(`/study-sets/${id}`);
     return data;
   },
-  
-  create: async (payload: CreateStudySetDTO) => {
-    const { data } = await apiClient.post<StudySet>('/study-sets', payload);
+
+  create: async (dto: CreateStudySetDto) => {
+    const { data } = await apiClient.post<StudySet>('/study-sets', dto);
     return data;
   },
-  
-  update: async (id: string, payload: UpdateStudySetDTO) => {
-    const { data } = await apiClient.patch<StudySet>(
-      `/study-sets/${id}`,
-      payload
-    );
+
+  update: async (id: string, dto: UpdateStudySetDto) => {
+    const { data } = await apiClient.put<StudySet>(`/study-sets/${id}`, dto);
     return data;
   },
-  
+
   delete: async (id: string) => {
     await apiClient.delete(`/study-sets/${id}`);
   },
 };
-
-// lib/api/hooks/useStudySets.ts
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { studySetsApi } from '../api/studySets.api';
-
-export const studySetKeys = {
-  all: ['studySets'] as const,
-  lists: () => [...studySetKeys.all, 'list'] as const,
-  list: (filters: string) => [...studySetKeys.lists(), { filters }] as const,
-  details: () => [...studySetKeys.all, 'detail'] as const,
-  detail: (id: string) => [...studySetKeys.details(), id] as const,
-};
-
-export const useStudySets = (params: GetStudySetsParams) => {
-  return useQuery({
-    queryKey: studySetKeys.list(JSON.stringify(params)),
-    queryFn: () => studySetsApi.getAll(params),
-  });
-};
-
-export const useStudySet = (id: string) => {
-  return useQuery({
-    queryKey: studySetKeys.detail(id),
-    queryFn: () => studySetsApi.getById(id),
-    enabled: !!id,
-  });
-};
-
-export const useCreateStudySet = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: studySetsApi.create,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: studySetKeys.lists() });
-    },
-  });
-};
-```
-
-### 2. Client State (Zustand)
-```typescript
-// stores/auth-store.ts
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-
-interface AuthState {
-  user: User | null;
-  accessToken: string | null;
-  isAuthenticated: boolean;
-  
-  setUser: (user: User | null) => void;
-  setAccessToken: (token: string | null) => void;
-  logout: () => void;
-}
-
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
-      user: null,
-      accessToken: null,
-      isAuthenticated: false,
-      
-      setUser: (user) => set({ user, isAuthenticated: !!user }),
-      setAccessToken: (token) => set({ accessToken: token }),
-      logout: () => set({ user: null, accessToken: null, isAuthenticated: false }),
-    }),
-    {
-      name: 'auth-storage',
-      partialize: (state) => ({
-        user: state.user,
-        isAuthenticated: state.isAuthenticated,
-      }),
-    }
-  )
-);
-
-// stores/ui-store.ts
-interface UIState {
-  sidebarOpen: boolean;
-  theme: 'light' | 'dark' | 'system';
-  
-  toggleSidebar: () => void;
-  setTheme: (theme: 'light' | 'dark' | 'system') => void;
-}
-
-export const useUIStore = create<UIState>((set) => ({
-  sidebarOpen: true,
-  theme: 'system',
-  
-  toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
-  setTheme: (theme) => set({ theme }),
-}));
 ```
 
 ---
 
-## 🎨 Component Patterns
+## 🧪 Testing Pattern
 
-### 1. Compound Components
 ```typescript
-// components/flashcards/flashcard.tsx
-interface FlashCardProps {
-  term: string;
-  definition: string;
-  imageUrl?: string;
-}
+// components/__tests__/button.test.tsx
+import { render, screen } from '@testing-library/react';
+import { Button } from '../button';
 
-interface FlashCardCompound {
-  Front: React.FC<{ children: React.ReactNode }>;
-  Back: React.FC<{ children: React.ReactNode }>;
-  Actions: React.FC<{ children: React.ReactNode }>;
-}
-
-export const FlashCard: React.FC<FlashCardProps> & FlashCardCompound = ({
-  term,
-  definition,
-  imageUrl,
-}) => {
-  const [isFlipped, setIsFlipped] = useState(false);
-  
-  return (
-    <div onClick={() => setIsFlipped(!isFlipped)}>
-      {isFlipped ? (
-        <div className="flashcard-back">
-          <p>{definition}</p>
-        </div>
-      ) : (
-        <div className="flashcard-front">
-          <p>{term}</p>
-          {imageUrl && <img src={imageUrl} alt="" />}
-        </div>
-      )}
-    </div>
-  );
-};
-
-FlashCard.Front = ({ children }) => <div className="front">{children}</div>;
-FlashCard.Back = ({ children }) => <div className="back">{children}</div>;
-FlashCard.Actions = ({ children }) => <div className="actions">{children}</div>;
-
-// Usage
-<FlashCard term="Mitochondria" definition="Powerhouse of cell">
-  <FlashCard.Actions>
-    <Button>Star</Button>
-    <Button>Edit</Button>
-  </FlashCard.Actions>
-</FlashCard>
-```
-
-### 2. Slots Pattern (Headless UI)
-```typescript
-// components/tabs/tabs.tsx
-interface TabsProps {
-  defaultValue: string;
-  children: React.ReactNode;
-}
-
-interface TabProps {
-  value: string;
-  children: React.ReactNode;
-}
-
-export const Tabs: React.FC<TabsProps> & { Tab: React.FC<TabProps> } = ({
-  defaultValue,
-  children,
-}) => {
-  const [activeTab, setActiveTab] = useState(defaultValue);
-  
-  return (
-    <TabsContext.Provider value={{ activeTab, setActiveTab }}>
-      <div>{children}</div>
-    </TabsContext.Provider>
-  );
-};
-
-Tabs.Tab = ({ value, children }) => {
-  const { activeTab, setActiveTab } = useTabsContext();
-  const isActive = activeTab === value;
-  
-  return (
-    <button
-      className={cn('tab', isActive && 'active')}
-      onClick={() => setActiveTab(value)}
-    >
-      {children}
-    </button>
-  );
-};
-```
-
----
-
-## 📝 Form Handling
-
-### React Hook Form + Zod
-```typescript
-// lib/validation/schemas.ts
-import { z } from 'zod';
-
-export const createStudySetSchema = z.object({
-  title: z.string().min(1, 'Title is required').max(500),
-  description: z.string().optional(),
-  visibility: z.enum(['public', 'private', 'password']),
-  password: z.string().optional(),
-  language: z.string().optional(),
-  subject: z.string().optional(),
-});
-
-export const createCardSchema = z.object({
-  term: z.string().min(1, 'Term is required'),
-  definition: z.string().min(1, 'Definition is required'),
-  imageUrl: z.string().url().optional().nullable(),
-  audioUrl: z.string().url().optional().nullable(),
-});
-
-export type CreateStudySetInput = z.infer<typeof createStudySetSchema>;
-
-// components/forms/StudySetForm.tsx
-export const StudySetForm: React.FC<StudySetFormProps> = ({ onSubmit }) => {
-  const form = useForm<CreateStudySetInput>({
-    resolver: zodResolver(createStudySetSchema),
-    defaultValues: {
-      visibility: 'public',
-    },
+describe('Button', () => {
+  it('renders with default variant', () => {
+    render(<Button>Click me</Button>);
+    expect(screen.getByRole('button')).toBeInTheDocument();
   });
-  
-  const handleSubmit = async (data: CreateStudySetInput) => {
-    try {
-      await onSubmit(data);
-      toast.success('Study set created successfully!');
-    } catch (error) {
-      toast.error('Failed to create study set');
-    }
-  };
-  
-  return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)}>
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Title</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        {/* More fields... */}
-        <Button type="submit">Create</Button>
-      </form>
-    </Form>
-  );
-};
-```
 
----
-
-## 🧪 Testing Strategy
-
-### 1. Unit Tests (Jest + RTL)
-```typescript
-// features/study-sets/__tests__/useStudySets.test.ts
-describe('useStudySets', () => {
-  it('should return study sets', async () => {
-    const { result } = renderHook(() => useStudySets({ page: 1 }), {
-      wrapper: createQueryClientWrapper(),
-    });
-    
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    
-    expect(result.current.data?.data).toHaveLength(10);
+  it('applies custom className', () => {
+    render(<Button className="custom-class">Click me</Button>);
+    expect(screen.getByRole('button')).toHaveClass('custom-class');
   });
-});
-```
 
-### 2. Component Tests
-```typescript
-// components/flashcards/__tests__/FlashCard.test.tsx
-describe('FlashCard', () => {
-  it('should flip when clicked', async () => {
-    render(<FlashCard term="Hello" definition="World" />);
-    
-    expect(screen.getByText('Hello')).toBeInTheDocument();
+  it('handles click events', async () => {
+    const handleClick = jest.fn();
+    render(<Button onClick={handleClick}>Click me</Button>);
     
     await userEvent.click(screen.getByRole('button'));
-    
-    expect(screen.getByText('World')).toBeInTheDocument();
-  });
-});
-```
-
-### 3. E2E Tests (Playwright)
-```typescript
-// tests/e2e/create-study-set.spec.ts
-import { test, expect } from '@playwright/test';
-
-test.describe('Study Set Creation', () => {
-  test('should create a new study set', async ({ page }) => {
-    await page.goto('/library');
-    await page.click('[data-testid="create-set-button"]');
-    
-    await page.fill('[name="title"]', 'My Study Set');
-    await page.fill('[name="description"]', 'Test description');
-    
-    await page.click('[type="submit"]');
-    
-    await expect(page.locator('text=My Study Set')).toBeVisible();
+    expect(handleClick).toHaveBeenCalledTimes(1);
   });
 });
 ```
 
 ---
 
-## 🚀 Performance Optimizations
+## ✅ Checklist Khi Tạo Component Mới
 
-### 1. Server Components
-```typescript
-// app/library/page.tsx (Server Component)
-import { getStudySets } from '@/features/study-sets/api/studySets.api';
+### Shared Component (components/)
 
-export default async function LibraryPage() {
-  const studySets = await getStudySets({ page: 1 });
-  
-  return <StudySetList initialData={studySets} />;
-}
-```
+- [ ] Tạo file trong `components/{feature}/` folder
+- [ ] Thêm `'use client'` directive nếu cần interactivity
+- [ ] Sử dụng UI components từ `components/ui/`
+- [ ] Export component và props interface
+- [ ] Viết unit tests trong `__tests__/`
 
-### 2. Suspense Boundaries
-```typescript
-// app/library/page.tsx
-import { Suspense } from 'react';
+### Page (app/)
 
-export default function LibraryPage() {
-  return (
-    <div>
-      <h1>My Library</h1>
-      
-      <Suspense fallback={<StudySetListSkeleton />}>
-        <StudySetList />
-      </Suspense>
-    </div>
-  );
-}
-```
+- [ ] Tạo folder trong `app/{route}/`
+- [ ] Tạo `page.tsx` cho UI
+- [ ] Thêm `loading.tsx` cho suspense state (optional)
+- [ ] Thêm `error.tsx` cho error boundary (optional)
+- [ ] Sử dụng Server Components khi có thể
 
-### 3. Image Optimization
-```typescript
-// Using Next.js Image component
-import Image from 'next/image';
+### API Client (lib/api/)
 
-<Image
-  src={card.imageUrl}
-  alt={card.term}
-  width={300}
-  height={200}
-  placeholder="blur"
-  blurDataURL={card.blurHash}
-/>
-```
+- [ ] Tạo function trong `lib/api/{resource}.ts`
+- [ ] Định nghĩa TypeScript types trong `types/api/`
+- [ ] Sử dụng Zod cho runtime validation
+- [ ] Handle errors và loading states
+
+### Feature Module
+
+- [ ] Components trong `components/{feature}/`
+- [ ] Hooks trong `hooks/` hoặc `components/{feature}/`
+- [ ] API functions trong `lib/api/`
+- [ ] Types trong `types/api/`
+- [ ] Tests trong `__tests__/`
 
 ---
 
-## 🔐 Authentication Flow
+## 📚 Resources
 
-### Next-Auth Integration
-```typescript
-// lib/auth/config.ts
-import NextAuth from 'next-auth';
-import CredentialsProvider from 'next-auth/providers/credentials';
-import { login } from '@/features/auth/api';
-
-export const authOptions = {
-  providers: [
-    CredentialsProvider({
-      name: 'Credentials',
-      credentials: {
-        email: { label: 'Email', type: 'email' },
-        password: { label: 'Password', type: 'password' },
-      },
-      async authorize(credentials) {
-        const user = await login(credentials.email, credentials.password);
-        if (user) return user;
-        return null;
-      },
-    }),
-  ],
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.accessToken = user.accessToken;
-        token.id = user.id;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      session.accessToken = token.accessToken;
-      session.user.id = token.id;
-      return session;
-    },
-  },
-  pages: {
-    signIn: '/login',
-    error: '/login',
-  },
-};
-
-// app/api/auth/[...nextauth]/route.ts
-const handler = NextAuth(authOptions);
-export { handler as GET, handler as POST };
-```
-
----
-
-## 🌐 Internationalization
-
-```typescript
-// middleware.ts
-import createMiddleware from 'next-intl/middleware';
-
-export default createMiddleware({
-  locales: ['en', 'vi', 'es', 'fr'],
-  defaultLocale: 'en',
-});
-
-export const config = {
-  matcher: ['/', '/(en|vi|es|fr)/:path*'],
-};
-
-// messages/en.json
-{
-  "common": {
-    "save": "Save",
-    "cancel": "Cancel",
-    "delete": "Delete"
-  },
-  "auth": {
-    "login": "Log in",
-    "register": "Sign up"
-  },
-  "studySets": {
-    "title": "Study Sets",
-    "create": "Create New Set"
-  }
-}
-```
+- [Next.js 14 Documentation](https://nextjs.org/docs)
+- [App Router](https://nextjs.org/docs/app)
+- [shadcn/ui](https://ui.shadcn.com/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [React Hook Form](https://react-hook-form.com/)
+- [Zod Validation](https://zod.dev/)
