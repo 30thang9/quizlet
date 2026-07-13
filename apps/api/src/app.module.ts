@@ -9,6 +9,7 @@ import { StudySetsModule } from './modules/study-sets/study-sets.module';
 import { CardsModule } from './modules/cards/cards.module';
 import { TagsModule } from './modules/tags/tags.module';
 import { SearchModule } from './modules/search/search.module';
+import { CommentsModule } from './modules/comments/comments.module';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -53,6 +54,7 @@ import { HealthController } from './health.controller';
     CardsModule,
     TagsModule,
     SearchModule,
+    CommentsModule,
   ],
   controllers: [HealthController],
 })
