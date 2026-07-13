@@ -1,4 +1,4 @@
-# 05 - Backend Architecture (NestJS)
+# 05 - Backend Architecture (NestJS Standard Structure)
 
 ## 🎯 Tech Stack
 
@@ -9,11 +9,10 @@
 │                                                                 │
 │  Framework      │ NestJS 10.x                                  │
 │  Language       │ TypeScript 5.x                               │
-│  ORM            │ TypeORM / Prisma                              │
+│  ORM            │ TypeORM                                        │
 │  Database       │ PostgreSQL 16                                 │
 │  Cache          │ Redis (ioredis)                               │
 │  Validation     │ class-validator + class-transformer           │
-│  Logging        │ Winston + ELK Stack                           │
 │  Testing        │ Jest + Supertest                              │
 │  API Docs       │ Swagger / OpenAPI                             │
 │  Auth           │ Passport.js + JWT                             │
@@ -34,31 +33,18 @@ apps/api/
 │   ├── config/                    # Configuration
 │   │   ├── config.module.ts
 │   │   ├── config.service.ts
-│   │   ├── config.interface.ts
 │   │   └── configuration.ts
 │   │
 │   ├── common/                    # Shared utilities
 │   │   ├── decorators/
 │   │   │   ├── current-user.decorator.ts
-│   │   │   ├── public.decorator.ts
-│   │   │   └── roles.decorator.ts
+│   │   │   └── public.decorator.ts
 │   │   │
 │   │   ├── filters/
-│   │   │   ├── http-exception.filter.ts
-│   │   │   └── transform.filter.ts
-│   │   │
-│   │   ├── guards/
-│   │   │   ├── auth.guard.ts
-│   │   │   ├── roles.guard.ts
-│   │   │   └── throttle.guard.ts
+│   │   │   └── http-exception.filter.ts
 │   │   │
 │   │   ├── interceptors/
-│   │   │   ├── logging.interceptor.ts
-│   │   │   ├── transform.interceptor.ts
-│   │   │   └── cache.interceptor.ts
-│   │   │
-│   │   ├── pipes/
-│   │   │   └── validation.pipe.ts
+│   │   │   └── transform.interceptor.ts
 │   │   │
 │   │   ├── interfaces/
 │   │   │   └── pagination.interface.ts
@@ -66,40 +52,140 @@ apps/api/
 │   │   └── utils/
 │   │       └── pagination.ts
 │   │
-│   ├── modules/                   # Feature modules
-│   │   ├── auth/
-│   │   │   ├── domain/           # Domain layer
-│   │   │   │   ├── entities/
-│   │   │   │   └── repositories/
-│   │   │   ├── application/       # Application layer
-│   │   │   │   ├── commands/
-│   │   │   │   ├── queries/
-│   │   │   │   └── services/
-│   │   │   ├── infrastructure/     # Infrastructure layer
-│   │   │   │   └── persistence/
-│   │   │   └── presentation/       # Presentation layer
-│   │   │       ├── controllers/
-│   │   │       ├── dto/
-│   │   │       └── auth.module.ts
+│   ├── modules/                   # Feature modules (NestJS Standard)
 │   │   │
-│   │   ├── users/
-│   │   ├── study-sets/
-│   │   ├── cards/
-│   │   ├── classes/
-│   │   ├── assignments/
-│   │   ├── progress/
-│   │   └── ...
+│   │   ├── auth/                 # Authentication module
+│   │   │   ├── auth.module.ts
+│   │   │   ├── auth.service.ts
+│   │   │   ├── auth.controller.ts
+│   │   │   ├── dto/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── login.dto.ts
+│   │   │   │   ├── register.dto.ts
+│   │   │   │   ├── refresh-token.dto.ts
+│   │   │   │   └── auth-response.dto.ts
+│   │   │   │
+│   │   │   ├── guards/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── jwt-auth.guard.ts
+│   │   │   │   ├── roles.guard.ts
+│   │   │   │   └── roles.decorator.ts
+│   │   │   │
+│   │   │   └── strategies/
+│   │   │       └── jwt.strategy.ts
+│   │   │
+│   │   ├── users/                # Users module
+│   │   │   ├── users.module.ts
+│   │   │   ├── users.service.ts
+│   │   │   ├── users.controller.ts
+│   │   │   ├── dto/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── create-user.dto.ts
+│   │   │   │   ├── update-user.dto.ts
+│   │   │   │   └── user-response.dto.ts
+│   │   │   └── entities/
+│   │   │       ├── index.ts
+│   │   │       └── user.entity.ts
+│   │   │
+│   │   ├── study-sets/           # Study Sets module
+│   │   │   ├── study-sets.module.ts
+│   │   │   ├── study-sets.service.ts
+│   │   │   ├── study-sets.controller.ts
+│   │   │   ├── dto/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── create-study-set.dto.ts
+│   │   │   │   ├── update-study-set.dto.ts
+│   │   │   │   └── study-set-response.dto.ts
+│   │   │   └── entities/
+│   │   │       ├── index.ts
+│   │   │       ├── study-set.entity.ts
+│   │   │       └── card.entity.ts
+│   │   │
+│   │   ├── cards/                # Cards module
+│   │   │   ├── cards.module.ts
+│   │   │   ├── cards.service.ts
+│   │   │   ├── cards.controller.ts
+│   │   │   ├── dto/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── create-card.dto.ts
+│   │   │   │   └── card-response.dto.ts
+│   │   │   └── entities/
+│   │   │       ├── index.ts
+│   │   │       └── card.entity.ts
+│   │   │
+│   │   ├── classes/              # Classes module
+│   │   │   ├── classes.module.ts
+│   │   │   ├── classes.service.ts
+│   │   │   ├── classes.controller.ts
+│   │   │   ├── dto/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── create-class.dto.ts
+│   │   │   │   └── class-response.dto.ts
+│   │   │   └── entities/
+│   │   │       ├── index.ts
+│   │   │       ├── class.entity.ts
+│   │   │       ├── class-member.entity.ts
+│   │   │       └── class-study-set.entity.ts
+│   │   │
+│   │   ├── comments/             # Comments module
+│   │   │   ├── comments.module.ts
+│   │   │   ├── comments.service.ts
+│   │   │   ├── comments.controller.ts
+│   │   │   ├── dto/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── create-comment.dto.ts
+│   │   │   │   └── comment-response.dto.ts
+│   │   │   └── entities/
+│   │   │       ├── index.ts
+│   │   │       ├── comment.entity.ts
+│   │   │       └── comment-like.entity.ts
+│   │   │
+│   │   ├── tags/                 # Tags module
+│   │   │   ├── tags.module.ts
+│   │   │   ├── tags.service.ts
+│   │   │   ├── tags.controller.ts
+│   │   │   ├── dto/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── create-tag.dto.ts
+│   │   │   │   └── tag-response.dto.ts
+│   │   │   └── entities/
+│   │   │       ├── index.ts
+│   │   │       ├── tag.entity.ts
+│   │   │       └── study-set-tag.entity.ts
+│   │   │
+│   │   ├── ai/                   # AI module
+│   │   │   ├── ai.module.ts
+│   │   │   ├── ai.service.ts
+│   │   │   └── ai.controller.ts
+│   │   │
+│   │   ├── media/                # Media module
+│   │   │   ├── media.module.ts
+│   │   │   ├── media.service.ts
+│   │   │   └── media.controller.ts
+│   │   │
+│   │   ├── search/               # Search module
+│   │   │   ├── search.module.ts
+│   │   │   ├── search.service.ts
+│   │   │   └── search.controller.ts
+│   │   │
+│   │   ├── diagrams/             # Diagrams module
+│   │   │   ├── diagrams.module.ts
+│   │   │   ├── diagrams.service.ts
+│   │   │   ├── diagrams.controller.ts
+│   │   │   └── entities/
+│   │   │       └── diagram.entity.ts
+│   │   │
+│   │   └── versions/             # Versions module
+│   │       ├── versions.module.ts
+│   │       ├── versions.service.ts
+│   │       ├── versions.controller.ts
+│   │       └── entities/
+│   │           └── study-set-version.entity.ts
 │   │
-│   ├── database/                   # Database configuration
-│   │   ├── database.module.ts
-│   │   ├── migrations/
-│   │   └── seeds/
-│   │
-│   └── shared/                     # Shared from packages
-│       ├── types/
-│       └── constants/
+│   └── database/                 # Database configuration
+│       └── database.module.ts
 │
-├── test/                           # E2E tests
+├── test/                         # E2E tests
 ├── .env.example
 ├── nest-cli.json
 ├── tsconfig.json
@@ -108,26 +194,61 @@ apps/api/
 
 ---
 
-## 🏗️ NestJS Module Pattern
+## 🏗️ Module Pattern (NestJS Standard)
 
-### Domain Layer
+### Module Structure Convention
+
+```
+modules/{name}/
+├── {name}.module.ts         # Module definition
+├── {name}.service.ts        # Business logic
+├── {name}.controller.ts     # API endpoints
+├── dto/                     # Data Transfer Objects
+│   ├── index.ts             # Barrel export
+│   ├── create-{name}.dto.ts
+│   ├── update-{name}.dto.ts
+│   └── {name}-response.dto.ts
+└── entities/                 # TypeORM Entities
+    ├── index.ts             # Barrel export
+    └── {name}.entity.ts
+```
+
+### Exception: Auth Module
+
+Auth module có cấu trúc đặc biệt với guards và strategies:
+
+```
+auth/
+├── auth.module.ts
+├── auth.service.ts
+├── auth.controller.ts
+├── dto/
+│   └── ...
+└── guards/
+│   ├── index.ts
+│   ├── jwt-auth.guard.ts
+│   ├── roles.guard.ts
+│   └── roles.decorator.ts
+└── strategies/
+    └── jwt.strategy.ts
+```
+
+---
+
+## 📝 Module Examples
+
+### Entity Example
+
 ```typescript
-// modules/users/domain/entities/user.entity.ts
-import { Entity, UUID } from '@shared/domain';
-import { Email } from '@shared/domain/value-objects/email.vo';
-
-export interface UserProps {
-  email: Email;
-  passwordHash: string;
-  name: string;
-  avatarUrl?: string;
-  bio?: string;
-  role: UserRole;
-  emailVerifiedAt?: Date;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt?: Date;
-}
+// modules/users/entities/user.entity.ts
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  Index,
+} from 'typeorm';
 
 export enum UserRole {
   FREE = 'free',
@@ -136,363 +257,304 @@ export enum UserRole {
   TEACHER = 'teacher',
 }
 
-export class User extends Entity<UUID, UserProps> {
-  get email(): Email {
-    return this.props.email;
-  }
-  
-  get name(): string {
-    return this.props.name;
-  }
-  
-  get role(): UserRole {
-    return this.props.role;
-  }
-  
-  isTeacher(): boolean {
-    return this.props.role === UserRole.TEACHER;
-  }
-  
-  static create(props: UserProps): User {
-    // Business logic
-    return new User(new UUID(), props);
-  }
-}
+@Entity('users')
+@Index(['email'], { unique: true })
+export class User {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-// modules/users/domain/repositories/user-repository.interface.ts
-import { Repository } from '@shared/domain/repository.interface';
+  @Column({ unique: true })
+  email: string;
 
-export interface IUserRepository extends Repository<User, UUID> {
-  findByEmail(email: Email): Promise<User | null>;
-  existsByEmail(email: Email): Promise<boolean>;
-}
-```
+  @Column({ select: false })
+  passwordHash: string;
 
-### Application Layer
-```typescript
-// modules/users/application/commands/create-user/create-user.command.ts
-export class CreateUserCommand {
-  constructor(
-    public readonly email: string,
-    public readonly password: string,
-    public readonly name: string,
-  ) {}
-}
+  @Column({ nullable: true })
+  name: string;
 
-// modules/users/application/commands/create-user/create-user.handler.ts
-@CommandHandler(CreateUserCommand)
-export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
-  constructor(
-    @Inject(INJECTIONS.USER_REPOSITORY)
-    private readonly userRepository: IUserRepository,
-    private readonly eventBus: IEventBus,
-    private readonly passwordHasher: IPasswordHasher,
-  ) {}
-  
-  async execute(command: CreateUserCommand): Promise<User> {
-    // 1. Check if email exists
-    const email = Email.create(command.email);
-    const exists = await this.userRepository.existsByEmail(email);
-    if (exists) {
-      throw new EmailAlreadyExistsException();
-    }
-    
-    // 2. Hash password
-    const passwordHash = await this.passwordHasher.hash(command.password);
-    
-    // 3. Create user
-    const user = User.create({
-      email,
-      passwordHash,
-      name: command.name,
-      role: UserRole.FREE,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
-    
-    // 4. Save
-    await this.userRepository.save(user);
-    
-    // 5. Publish event
-    await this.eventBus.publish(new UserCreatedEvent(user));
-    
-    return user;
-  }
-}
+  @Column({ nullable: true })
+  avatarUrl: string;
 
-// modules/users/application/queries/get-user/get-user.query.ts
-export class GetUserQuery {
-  constructor(public readonly id: string) {}
-}
+  @Column({ nullable: true, type: 'text' })
+  bio: string;
 
-// modules/users/application/queries/get-user/get-user.handler.ts
-@QueryHandler(GetUserQuery)
-export class GetUserHandler implements IQueryHandler<GetUserQuery, User> {
-  constructor(
-    @Inject(INJECTIONS.USER_REPOSITORY)
-    private readonly userRepository: IUserRepository,
-  ) {}
-  
-  async execute(query: GetUserQuery): Promise<User> {
-    const user = await this.userRepository.findById(new UUID(query.id));
-    if (!user) {
-      throw new UserNotFoundException();
-    }
-    return user;
-  }
+  @Column({
+    type: 'enum',
+    enum: UserRole,
+    default: UserRole.FREE,
+  })
+  role: UserRole;
+
+  @Column({ default: true })
+  isActive: boolean;
+
+  @Column({ default: false })
+  isEmailVerified: boolean;
+
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
 }
 ```
 
-### Infrastructure Layer
-```typescript
-// modules/users/infrastructure/persistence/typeorm-user.repository.ts
-@Injectable()
-export class TypeOrmUserRepository implements IUserRepository {
-  constructor(
-    @InjectRepository(UserEntity)
-    private readonly repo: Repository<UserEntity>,
-  ) {}
-  
-  async findById(id: UUID): Promise<User | null> {
-    const entity = await this.repo.findOne({ where: { id: id.value } });
-    return entity ? this.mapper.toDomain(entity) : null;
-  }
-  
-  async findByEmail(email: Email): Promise<User | null> {
-    const entity = await this.repo.findOne({ where: { email: email.value } });
-    return entity ? this.mapper.toDomain(entity) : null;
-  }
-  
-  async existsByEmail(email: Email): Promise<boolean> {
-    const count = await this.repo.count({ where: { email: email.value } });
-    return count > 0;
-  }
-  
-  async save(user: User): Promise<void> {
-    const entity = this.mapper.toEntity(user);
-    await this.repo.save(entity);
-  }
-}
+### DTO Example
 
-// modules/users/infrastructure/persistence/user.mapper.ts
-@Injectable()
-export class UserMapper {
-  toDomain(entity: UserEntity): User {
-    return User.restore(
-      new UUID(entity.id),
-      {
-        email: Email.create(entity.email),
-        passwordHash: entity.passwordHash,
-        name: entity.name,
-        avatarUrl: entity.avatarUrl,
-        bio: entity.bio,
-        role: entity.role as UserRole,
-        emailVerifiedAt: entity.emailVerifiedAt,
-        createdAt: entity.createdAt,
-        updatedAt: entity.updatedAt,
-        deletedAt: entity.deletedAt,
-      }
-    );
-  }
-  
-  toEntity(user: User): UserEntity {
-    return {
-      id: user.id.value,
-      email: user.email.value,
-      passwordHash: user.props.passwordHash,
-      name: user.props.name,
-      avatarUrl: user.props.avatarUrl,
-      bio: user.props.bio,
-      role: user.props.role,
-      emailVerifiedAt: user.props.emailVerifiedAt,
-      createdAt: user.props.createdAt,
-      updatedAt: user.props.updatedAt,
-      deletedAt: user.props.deletedAt,
-    };
-  }
-}
-```
-
-### Presentation Layer
 ```typescript
-// modules/users/presentation/dto/create-user.dto.ts
+// modules/users/dto/create-user.dto.ts
+import { IsEmail, IsString, MinLength, IsOptional } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
 export class CreateUserDto {
+  @ApiProperty({ example: 'user@example.com' })
   @IsEmail()
   email: string;
-  
+
+  @ApiProperty({ example: 'Password123!' })
   @IsString()
   @MinLength(8)
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, {
-    message: 'Password too weak',
-  })
   password: string;
-  
-  @IsString()
-  @MinLength(1)
-  @MaxLength(255)
-  name: string;
-}
 
-// modules/users/presentation/controllers/users.controller.ts
-@Controller('users')
-@ApiTags('Users')
-export class UsersController {
+  @ApiPropertyOptional({ example: 'John Doe' })
+  @IsString()
+  @IsOptional()
+  name?: string;
+}
+```
+
+```typescript
+// modules/users/dto/index.ts
+export * from './create-user.dto';
+export * from './update-user.dto';
+export * from './user-response.dto';
+```
+
+### Service Example
+
+```typescript
+// modules/users/users.service.ts
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from './entities/user.entity';
+import { CreateUserDto, UpdateUserDto } from './dto';
+
+@Injectable()
+export class UsersService {
   constructor(
-    private readonly createUserHandler: CreateUserHandler,
-    private readonly getUserHandler: GetUserHandler,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
-  
-  @Post()
-  @HttpCode(HttpStatus.CREATED)
-  async create(@Body() dto: CreateUserDto): Promise<UserResponseDto> {
-    const command = new CreateUserCommand(dto.email, dto.password, dto.name);
-    const user = await this.createUserHandler.execute(command);
-    return this.toResponse(user);
+
+  async create(dto: CreateUserDto): Promise<User> {
+    const existing = await this.userRepository.findOne({
+      where: { email: dto.email },
+    });
+
+    if (existing) {
+      throw new ConflictException('Email already exists');
+    }
+
+    const user = this.userRepository.create({
+      email: dto.email,
+      passwordHash: await this.hashPassword(dto.password), // Implement hash
+      name: dto.name,
+    });
+
+    return this.userRepository.save(user);
   }
-  
-  @Get(':id')
-  async findOne(@Param('id') id: string): Promise<UserResponseDto> {
-    const query = new GetUserQuery(id);
-    const user = await this.getUserHandler.execute(query);
-    return this.toResponse(user);
+
+  async findById(id: string): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
-  
-  private toResponse(user: User): UserResponseDto {
-    return {
-      id: user.id.value,
-      email: user.email.value,
-      name: user.name,
-      role: user.role,
-      avatarUrl: user.props.avatarUrl,
-      createdAt: user.props.createdAt,
-    };
+
+  async update(id: string, dto: UpdateUserDto): Promise<User> {
+    const user = await this.findById(id);
+    Object.assign(user, dto);
+    return this.userRepository.save(user);
   }
 }
 ```
 
-### Module Wiring
+### Controller Example
+
+```typescript
+// modules/users/users.controller.ts
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Body,
+  Param,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { UsersService } from './users.service';
+import { CreateUserDto, UpdateUserDto } from './dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+
+@ApiTags('Users')
+@Controller('users')
+export class UsersController {
+  constructor(private readonly usersService: UsersService) {}
+
+  @Post()
+  @ApiOperation({ summary: 'Create a new user' })
+  async create(@Body() dto: CreateUserDto) {
+    const user = await this.usersService.create(dto);
+    return { success: true, data: user };
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get user by ID' })
+  async findOne(@Param('id') id: string) {
+    const user = await this.usersService.findById(id);
+    return { success: true, data: user };
+  }
+
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update user' })
+  async update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
+    const user = await this.usersService.update(id, dto);
+    return { success: true, data: user };
+  }
+
+  @Get('me/profile')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get current user profile' })
+  async getProfile(@Request() req: any) {
+    const user = await this.usersService.findById(req.user.id);
+    return { success: true, data: user };
+  }
+}
+```
+
+### Module Example
+
 ```typescript
 // modules/users/users.module.ts
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UsersService } from './users.service';
+import { UsersController } from './users.controller';
+import { User } from './entities/user.entity';
+
 @Module({
-  imports: [
-    CqrsModule.registerHandlers([
-      CreateUserHandler,
-      GetUserHandler,
-      UpdateUserHandler,
-      DeleteUserHandler,
-      // Query handlers...
-    ]),
-    EventBusModule,
-  ],
+  imports: [TypeOrmModule.forFeature([User])],
   controllers: [UsersController],
-  providers: [
-    // Infrastructure
-    TypeOrmUserRepository,
-    UserMapper,
-    
-    // Bind interface to implementation
-    {
-      provide: INJECTIONS.USER_REPOSITORY,
-      useClass: TypeOrmUserRepository,
-    },
-    {
-      provide: INJECTIONS.PASSWORD_HASHER,
-      useClass: BcryptPasswordHasher,
-    },
-  ],
-  exports: [
-    UsersService,
-    {
-      provide: INJECTIONS.USER_REPOSITORY,
-      useClass: TypeOrmUserRepository,
-    },
-  ],
+  providers: [UsersService],
+  exports: [UsersService],
 })
 export class UsersModule {}
 ```
 
 ---
 
-## 🔐 Authentication Module
+## 🔐 Auth Guards
 
-### JWT Strategy
+### JWT Auth Guard
+
 ```typescript
-// modules/auth/infrastructure/strategies/jwt.strategy.ts
+// modules/auth/guards/jwt-auth.guard.ts
+import { Injectable, ExecutionContext } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { Reflector } from '@nestjs/core';
+
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor() {
-    super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: false,
-      secretOrKey: config.jwt.secret,
-    });
+export class JwtAuthGuard extends AuthGuard('jwt') {
+  constructor(private reflector: Reflector) {
+    super();
   }
-  
-  async validate(payload: JwtPayload): Promise<User> {
-    const user = await this.userRepository.findById(new UUID(payload.sub));
-    if (!user) {
-      throw new UnauthorizedException();
+
+  canActivate(context: ExecutionContext) {
+    const isPublic = this.reflector.getAllAndOverride<boolean>('isPublic', [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    if (isPublic) {
+      return true;
     }
-    return user;
+
+    return super.canActivate(context);
   }
 }
+```
 
-// modules/auth/infrastructure/strategies/jwt-auth.guard.ts
-export class JwtAuthGuard extends AuthGuard('jwt') {}
+### Roles Guard
 
-// modules/auth/infrastructure/guards/roles.guard.ts
+```typescript
+// modules/auth/guards/roles.guard.ts
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { UserRole } from '../../users/entities/user.entity';
+
 @Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(
-    private readonly reflector: Reflector,
-  ) {}
-  
+  constructor(private reflector: Reflector) {}
+
   canActivate(context: ExecutionContext): boolean {
     const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>('roles', [
       context.getHandler(),
       context.getClass(),
     ]);
-    
+
     if (!requiredRoles) {
       return true;
     }
-    
+
     const { user } = context.switchToHttp().getRequest();
     return requiredRoles.some((role) => user.role === role);
   }
 }
+```
 
-// Decorators
-export const Roles = (...roles: UserRole[]) => SetMetadata('roles', roles);
+### Roles Decorator
+
+```typescript
+// modules/auth/guards/roles.decorator.ts
+import { SetMetadata } from '@nestjs/common';
+import { UserRole } from '../../users/entities/user.entity';
+
+export const ROLES_KEY = 'roles';
+export const Roles = (...roles: UserRole[]) => SetMetadata(ROLES_KEY, roles);
 export const Public = () => SetMetadata('isPublic', true);
-export const CurrentUser = () => createParamDecorator(
-  (data: unknown, ctx: ExecutionContext) => ctx.switchToHttp().getRequest().user,
-)();
 ```
 
 ---
 
-## 🗄️ Database Module
+## 🗄️ Database Configuration
 
-### TypeORM Configuration
 ```typescript
-// database/database.module.ts
+// src/database/database.module.ts
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (config: ConfigService) => ({
+      useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        host: config.database.host,
-        port: config.database.port,
-        username: config.database.username,
-        password: config.database.password,
-        database: config.database.name,
+        host: configService.get('DB_HOST'),
+        port: configService.get('DB_PORT'),
+        username: configService.get('DB_USERNAME'),
+        password: configService.get('DB_PASSWORD'),
+        database: configService.get('DB_DATABASE'),
         entities: [__dirname + '/../../**/*.entity{.ts,.js}'],
-        migrations: [__dirname + '/migrations/*{.ts,.js}'],
-        synchronize: false,
-        logging: config.nodeEnv === 'development',
-        ssl: config.nodeEnv === 'production',
+        synchronize: configService.get('NODE_ENV') === 'development',
+        logging: configService.get('NODE_ENV') === 'development',
       }),
       inject: [ConfigService],
     }),
@@ -501,244 +563,27 @@ export const CurrentUser = () => createParamDecorator(
 export class DatabaseModule {}
 ```
 
-### Migration Example
-```typescript
-// database/migrations/1700000000001-CreateUsersTable.ts
-export class CreateUsersTable1700000000001 implements MigrationInterface {
-  public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.createTable(
-      new Table({
-        name: 'users',
-        columns: [
-          {
-            name: 'id',
-            type: 'uuid',
-            isPrimary: true,
-            generationStrategy: 'uuid',
-            default: 'gen_random_uuid()',
-          },
-          {
-            name: 'email',
-            type: 'varchar',
-            length: '255',
-            isUnique: true,
-          },
-          {
-            name: 'password_hash',
-            type: 'varchar',
-            length: '255',
-          },
-          {
-            name: 'name',
-            type: 'varchar',
-            length: '255',
-          },
-          {
-            name: 'role',
-            type: 'varchar',
-            length: '50',
-            default: "'free'",
-          },
-          {
-            name: 'created_at',
-            type: 'timestamp',
-            default: 'CURRENT_TIMESTAMP',
-          },
-          {
-            name: 'updated_at',
-            type: 'timestamp',
-            default: 'CURRENT_TIMESTAMP',
-          },
-        ],
-      }),
-      true,
-    );
-  }
-  
-  public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('users');
-  }
-}
-```
-
----
-
-## 🚦 Throttling & Rate Limiting
-
-```typescript
-// common/guards/throttle.guard.ts
-@Injectable()
-export class ThrottlerGuard extends ThrottlerGuard {
-  protected async throwThrottlingException(): Promise<void> {
-    throw new ThrottlerException(
-      'Too many requests. Please slow down.',
-    );
-  }
-}
-
-// Usage in controller
-@Controller()
-@UseGuards(ThrottlerGuard)
-export class AuthController {
-  @Post('login')
-  @Throttle(5, 60) // 5 requests per minute for login
-  async login(@Body() dto: LoginDto) {
-    // ...
-  }
-}
-```
-
----
-
-## 📋 Logging
-
-```typescript
-// common/interceptors/logging.interceptor.ts
-@Injectable()
-export class LoggingInterceptor implements NestInterceptor {
-  private readonly logger = new Logger(LoggingInterceptor.name);
-  
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    const request = context.switchToHttp().getRequest();
-    const { method, url } = request;
-    const now = Date.now();
-    
-    return next.handle().pipe(
-      tap(() => {
-        const response = context.switchToHttp().getResponse();
-        this.logger.log(
-          `${method} ${url} ${response.statusCode} - ${Date.now() - now}ms`,
-        );
-      }),
-      catchError((error) => {
-        this.logger.error(
-          `${method} ${url} - Error: ${error.message}`,
-          error.stack,
-        );
-        throw error;
-      }),
-    );
-  }
-}
-```
-
----
-
-## 🧪 Testing
-
-### Unit Tests
-```typescript
-// modules/users/application/__tests__/create-user.handler.spec.ts
-describe('CreateUserHandler', () => {
-  let handler: CreateUserHandler;
-  let userRepository: jest.Mocked<IUserRepository>;
-  let eventBus: jest.Mocked<IEventBus>;
-  
-  beforeEach(() => {
-    const module = await Test.createTestingModule({
-      providers: [
-        CreateUserHandler,
-        {
-          provide: INJECTIONS.USER_REPOSITORY,
-          useValue: {
-            existsByEmail: jest.fn(),
-            save: jest.fn(),
-          },
-        },
-        {
-          provide: INJECTIONS.EVENT_BUS,
-          useValue: {
-            publish: jest.fn(),
-          },
-        },
-      ],
-    }).compile();
-    
-    handler = module.get(CreateUserHandler);
-    userRepository = module.get(INJECTIONS.USER_REPOSITORY);
-    eventBus = module.get(INJECTIONS.EVENT_BUS);
-  });
-  
-  it('should create a new user', async () => {
-    const command = new CreateUserCommand(
-      'test@example.com',
-      'Password123!',
-      'Test User',
-    );
-    
-    userRepository.existsByEmail.mockResolvedValue(false);
-    userRepository.save.mockResolvedValue(undefined);
-    eventBus.publish.mockResolvedValue(undefined);
-    
-    const result = await handler.execute(command);
-    
-    expect(result).toBeInstanceOf(User);
-    expect(result.email.value).toBe('test@example.com');
-    expect(userRepository.save).toHaveBeenCalled();
-  });
-  
-  it('should throw EmailAlreadyExistsException if email exists', async () => {
-    const command = new CreateUserCommand(
-      'existing@example.com',
-      'Password123!',
-      'Test User',
-    );
-    
-    userRepository.existsByEmail.mockResolvedValue(true);
-    
-    await expect(handler.execute(command)).rejects.toThrow(
-      EmailAlreadyExistsException,
-    );
-  });
-});
-```
-
-### E2E Tests
-```typescript
-// test/users.e2e-spec.ts
-describe('/users (e2e)', () => {
-  let app: INestApplication;
-  let accessToken: string;
-  
-  beforeAll(async () => {
-    const module = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-    
-    app = module.createNestApplication();
-    await app.init();
-    
-    // Login to get token
-    const response = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({ email: 'test@example.com', password: 'Password123!' });
-    
-    accessToken = response.body.data.tokens.accessToken;
-  });
-  
-  it('GET /users/me', async () => {
-    const response = await request(app.getHttpServer())
-      .get('/users/me')
-      .set('Authorization', `Bearer ${accessToken}`)
-      .expect(200);
-    
-    expect(response.body.success).toBe(true);
-    expect(response.body.data.email).toBe('test@example.com');
-  });
-});
-```
-
 ---
 
 ## 📚 Swagger/OpenAPI
 
 ```typescript
-// main.ts
+// src/main.ts
+import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { ValidationPipe } from '@nestjs/common';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    }),
+  );
+
   const config = new DocumentBuilder()
     .setTitle('Quizlet Clone API')
     .setDescription('API documentation for Quizlet Clone')
@@ -747,11 +592,39 @@ async function bootstrap() {
     .addTag('auth', 'Authentication endpoints')
     .addTag('users', 'User management')
     .addTag('study-sets', 'Study set operations')
+    .addTag('cards', 'Card operations')
+    .addTag('classes', 'Class management')
+    .addTag('comments', 'Comments')
+    .addTag('tags', 'Tags')
+    .addTag('ai', 'AI features')
+    .addTag('media', 'Media uploads')
+    .addTag('search', 'Search functionality')
     .build();
-  
+
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
-  
+
   await app.listen(3000);
 }
+
+bootstrap();
 ```
+
+---
+
+## ✅ Checklist Khi Tạo Module Mới
+
+- [ ] Tạo folder `modules/{name}/`
+- [ ] Tạo `{name}.module.ts` với TypeOrmModule.forFeature()
+- [ ] Tạo `{name}.service.ts` với @Injectable()
+- [ ] Tạo `{name}.controller.ts` với decorators
+- [ ] Tạo folder `dto/` với:
+  - [ ] `index.ts` (barrel export)
+  - [ ] `create-{name}.dto.ts`
+  - [ ] `update-{name}.dto.ts`
+  - [ ] `{name}-response.dto.ts`
+- [ ] Tạo folder `entities/` với:
+  - [ ] `index.ts` (barrel export)
+  - [ ] `{name}.entity.ts`
+- [ ] Import module mới vào `app.module.ts`
+- [ ] Thêm Swagger @ApiTags() vào controller
