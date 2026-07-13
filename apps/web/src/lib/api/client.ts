@@ -239,6 +239,28 @@ export const apiEndpoints = {
     list: (params?: { search?: string }) => api.get('/tags', { params }),
     findOrCreate: (data: { name: string; color?: string }) => api.post('/tags/find-or-create', data),
   },
+
+  // Diagrams
+  diagrams: {
+    list: (params?: { page?: number; limit?: number }) =>
+      api.get('/diagrams', { params }),
+    get: (id: string) => api.get(`/diagrams/${id}`),
+    create: (data: { title: string; description?: string; imageUrl: string; studySetId?: string }) =>
+      api.post('/diagrams', data),
+    update: (id: string, data: Partial<{ title: string; description: string; imageUrl: string }>) =>
+      api.put(`/diagrams/${id}`, data),
+    delete: (id: string) => api.delete(`/diagrams/${id}`),
+    copy: (id: string) => api.post(`/diagrams/${id}/copy`),
+    addLabel: (diagramId: string, data: { xPosition: number; yPosition: number; term: string; definition: string; hint?: string }) =>
+      api.post(`/diagrams/${diagramId}/labels`, data),
+    updateLabel: (labelId: string, data: Partial<{ term: string; definition: string; hint: string }>) =>
+      api.patch(`/diagrams/labels/${labelId}`, data),
+    deleteLabel: (labelId: string) => api.delete(`/diagrams/labels/${labelId}`),
+    bulkAddLabels: (diagramId: string, data: { labels: Array<{ xPosition: number; yPosition: number; term: string; definition: string; hint?: string }> }) =>
+      api.post(`/diagrams/${diagramId}/labels/bulk`, data),
+    reorderLabels: (diagramId: string, data: { labelIds: string[] }) =>
+      api.put(`/diagrams/${diagramId}/labels/reorder`, data),
+  },
 } as const;
 
 export type ApiEndpoints = typeof apiEndpoints;
