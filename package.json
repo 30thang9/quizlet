@@ -19,9 +19,13 @@
     "clean": "pnpm -r clean",
     "format": "pnpm -r format",
     "db:migrate": "pnpm --filter @quizlet/api db:migrate",
-    "db:seed": "pnpm --filter @quizlet/api db:seed"
+    "db:seed": "pnpm --filter @quizlet/api db:seed",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@types/node": "^20.10.0",
     "typescript": "^5.3.2"
   },
