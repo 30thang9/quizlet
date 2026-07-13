@@ -59,7 +59,7 @@ const SearchBarComponent = ({
       if (selectedFilter === 'popular') params.set('sortBy', 'popular');
       if (selectedFilter === 'recent') params.set('sortBy', 'created');
 
-      const response = await fetch(`/api/search/study-sets?${params}`);
+      const response = await fetch(`/api/v1/search/study-sets?${params}`);
       const data = await response.json();
       setResults(data.studySets || []);
     } catch {
