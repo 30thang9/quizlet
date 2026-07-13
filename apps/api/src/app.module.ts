@@ -7,6 +7,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { StudySetsModule } from './modules/study-sets/study-sets.module';
 import { CardsModule } from './modules/cards/cards.module';
+import { TagsModule } from './modules/tags/tags.module';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -49,6 +50,7 @@ import { HealthController } from './health.controller';
     UsersModule,
     StudySetsModule,
     CardsModule,
+    TagsModule,
   ],
   controllers: [HealthController],
 })

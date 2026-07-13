@@ -5,10 +5,13 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
+  ManyToMany,
   JoinColumn,
+  JoinTable,
   Index,
 } from 'typeorm';
 import { User } from '../../../users/domain/entities/user.entity';
+import { Tag } from '../../../tags/domain/entities/tag.entity';
 
 export enum Visibility {
   PUBLIC = 'public',
@@ -54,6 +57,14 @@ export class StudySet {
 
   @Column({ type: 'varchar', length: 100, nullable: true })
   subject?: string;
+
+  @ManyToMany(() => Tag, (tag) => tag.studySets, { cascade: true })
+  @JoinTable({
+    name: 'study_set_tags',
+    joinColumn: { name: 'study_set_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'tag_id', referencedColumnName: 'id' },
+  })
+  tags?: Tag[];
 
   // Denormalized stats
   @Column({ type: 'integer', default: 0, name: 'card_count' })
