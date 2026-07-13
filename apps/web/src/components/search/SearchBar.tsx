@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, memo, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search as SearchIcon, X, Filter, Clock, TrendingUp, Users, BookOpen } from 'lucide-react';
+import { Search as SearchIcon, X, Clock, TrendingUp, Users, BookOpen } from 'lucide-react';
 
 interface SearchResult {
   id: string;
@@ -23,7 +23,20 @@ interface SearchBarProps {
   autoFocus?: boolean;
 }
 
-export function SearchBar({ variant = 'header', placeholder = 'Search study sets...', autoFocus = false }: SearchBarProps) {
+const FILTERS = [
+  { id: 'popular', label: 'Popular', icon: TrendingUp },
+  { id: 'recent', label: 'Recent', icon: Clock },
+  { id: 'users', label: 'Users', icon: Users },
+] as const;
+
+const DEBOUNCE_DELAY = 300;
+const MAX_RESULTS_DISPLAY = 8;
+
+const SearchBarComponent = ({
+  variant = 'header',
+  placeholder = 'Search study sets...',
+  autoFocus = false,
+}: SearchBarProps) => {
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -31,14 +44,9 @@ export function SearchBar({ variant = 'header', placeholder = 'Search study sets
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const debounceRef = useRef<NodeJS.Timeout>();
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
-  const filters = [
-    { id: 'popular', label: 'Popular', icon: TrendingUp },
-    { id: 'recent', label: 'Recent', icon: Clock },
-    { id: 'users', label: 'Users', icon: Users },
-  ];
-
+  // Memoized search function
   const performSearch = useCallback(async (searchQuery: string) => {
     if (!searchQuery.trim()) {
       setResults([]);
@@ -50,7 +58,7 @@ export function SearchBar({ variant = 'header', placeholder = 'Search study sets
       const params = new URLSearchParams({ q: searchQuery });
       if (selectedFilter === 'popular') params.set('sortBy', 'popular');
       if (selectedFilter === 'recent') params.set('sortBy', 'created');
-      
+
       const response = await fetch(`/api/search/study-sets?${params}`);
       const data = await response.json();
       setResults(data.studySets || []);
@@ -61,6 +69,7 @@ export function SearchBar({ variant = 'header', placeholder = 'Search study sets
     }
   }, [selectedFilter]);
 
+  // Debounced search effect
   useEffect(() => {
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
@@ -69,7 +78,7 @@ export function SearchBar({ variant = 'header', placeholder = 'Search study sets
     if (query.trim()) {
       debounceRef.current = setTimeout(() => {
         performSearch(query);
-      }, 300);
+      }, DEBOUNCE_DELAY);
     } else {
       setResults([]);
     }
@@ -81,7 +90,8 @@ export function SearchBar({ variant = 'header', placeholder = 'Search study sets
     };
   }, [query, performSearch]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Memoized handlers
+  const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
       const params = new URLSearchParams();
@@ -91,15 +101,24 @@ export function SearchBar({ variant = 'header', placeholder = 'Search study sets
       router.push(`/search?${params.toString()}`);
       setIsOpen(false);
     }
-  };
+  }, [query, selectedFilter, router]);
 
-  const handleResultClick = (resultId: string) => {
+  const handleResultClick = useCallback((resultId: string) => {
     router.push(`/study-sets/${resultId}`);
     setIsOpen(false);
     setQuery('');
-  };
+  }, [router]);
 
+  const handleClear = useCallback(() => {
+    setQuery('');
+    setResults([]);
+    inputRef.current?.focus();
+  }, []);
+
+  // Memoized values
   const isLarge = variant === 'page';
+  const displayResults = useMemo(() => results.slice(0, MAX_RESULTS_DISPLAY), [results]);
+  const hasMoreResults = results.length > MAX_RESULTS_DISPLAY;
 
   return (
     <div className="relative">
@@ -121,12 +140,14 @@ export function SearchBar({ variant = 'header', placeholder = 'Search study sets
             className={`flex-1 bg-transparent outline-none text-gray-800 placeholder-gray-400 ${
               isLarge ? 'text-lg' : 'text-sm'
             }`}
+            aria-label="Search study sets"
           />
           {query && (
             <button
               type="button"
-              onClick={() => { setQuery(''); setResults([]); }}
+              onClick={handleClear}
               className="p-1 hover:bg-gray-100 rounded-full"
+              aria-label="Clear search"
             >
               <X className="w-4 h-4 text-gray-400" />
             </button>
@@ -145,10 +166,12 @@ export function SearchBar({ variant = 'header', placeholder = 'Search study sets
       {/* Filters */}
       {isOpen && isLarge && (
         <div className="flex gap-2 mt-3">
-          {filters.map((filter) => (
+          {FILTERS.map((filter) => (
             <button
               key={filter.id}
-              onClick={() => setSelectedFilter(selectedFilter === filter.id ? null : filter.id)}
+              onClick={() => setSelectedFilter(
+                selectedFilter === filter.id ? null : filter.id
+              )}
               className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm transition-colors ${
                 selectedFilter === filter.id
                   ? 'bg-sky-100 text-sky-700'
@@ -170,12 +193,12 @@ export function SearchBar({ variant = 'header', placeholder = 'Search study sets
               <div className="animate-spin w-6 h-6 border-2 border-sky-500 border-t-transparent rounded-full mx-auto mb-2" />
               Searching...
             </div>
-          ) : results.length > 0 ? (
+          ) : displayResults.length > 0 ? (
             <div className="py-2">
               <div className="px-4 py-2 text-xs font-medium text-gray-500 uppercase">
                 Study Sets
               </div>
-              {results.slice(0, 8).map((result) => (
+              {displayResults.map((result) => (
                 <button
                   key={result.id}
                   onClick={() => handleResultClick(result.id)}
@@ -193,7 +216,10 @@ export function SearchBar({ variant = 'header', placeholder = 'Search study sets
                           <span
                             key={tag.name}
                             className="px-2 py-0.5 rounded text-xs"
-                            style={{ backgroundColor: `${tag.color}20`, color: tag.color }}
+                            style={{
+                              backgroundColor: `${tag.color}20`,
+                              color: tag.color
+                            }}
                           >
                             {tag.name}
                           </span>
@@ -203,7 +229,7 @@ export function SearchBar({ variant = 'header', placeholder = 'Search study sets
                   </div>
                 </button>
               ))}
-              {results.length > 8 && (
+              {hasMoreResults && (
                 <button
                   onClick={handleSubmit}
                   className="w-full px-4 py-3 text-center text-sky-600 hover:bg-sky-50 font-medium"
@@ -223,4 +249,7 @@ export function SearchBar({ variant = 'header', placeholder = 'Search study sets
       )}
     </div>
   );
-}
+};
+
+// Memoized export for performance
+export const SearchBar = memo(SearchBarComponent);
