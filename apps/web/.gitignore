@@ -1,0 +1,37 @@
+# ===========================================
+# WEB - Specific Git Ignore
+# ===========================================
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.*.*
+
+# Build outputs
+.next/
+out/
+build/
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Test coverage
+coverage/
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Next.js
+.next/
+
+# Turborepo
+.turbo/
+
+# ESLint
+.eslintcache
