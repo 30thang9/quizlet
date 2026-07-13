@@ -5,11 +5,12 @@ import { useParams, useRouter } from 'next/navigation';
 import { 
   ArrowLeft, BookOpen, Zap, Brain, FileText, Share2, 
   Edit, Copy, Heart, MoreVertical, User, Clock,
-  Plus, Trash2, Eye
+  Plus, Trash2, Eye, MessageCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ShareModal } from '@/components/study';
 import { TagsInput } from '@/components/tags';
+import { AskQuizlet } from '@/components/ai';
 
 interface Tag {
   id: string;
@@ -48,6 +49,7 @@ export default function StudySetDetailPage() {
   const [studySet, setStudySet] = useState<StudySet | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showAskQuizlet, setShowAskQuizlet] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
 
   // Demo data
@@ -219,7 +221,7 @@ export default function StudySetDetailPage() {
       {/* Study Modes */}
       <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-6">
         <h2 className="text-lg font-bold text-gray-800 mb-4">Study Modes</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <button
             onClick={() => router.push(`/study/${studySet.id}?mode=cards`)}
             className="p-4 border border-gray-200 rounded-xl hover:border-sky-500 hover:bg-sky-50 transition-colors text-center"
@@ -247,6 +249,13 @@ export default function StudySetDetailPage() {
           >
             <FileText className="w-8 h-8 text-orange-500 mx-auto mb-2" />
             <span className="font-medium text-gray-800">Test</span>
+          </button>
+          <button
+            onClick={() => setShowAskQuizlet(true)}
+            className="p-4 border border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-colors text-center"
+          >
+            <MessageCircle className="w-8 h-8 text-blue-500 mx-auto mb-2" />
+            <span className="font-medium text-gray-800">Ask AI</span>
           </button>
         </div>
       </div>
@@ -301,6 +310,16 @@ export default function StudySetDetailPage() {
         isLiked={studySet.isLiked}
         onLike={handleLike}
       />
+
+      {/* Ask Quizlet Modal */}
+      {showAskQuizlet && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <AskQuizlet
+            context={studySet.cards.map(c => `${c.term}: ${c.definition}`).join('\n')}
+            onClose={() => setShowAskQuizlet(false)}
+          />
+        </div>
+      )}
     </div>
   );
 }
