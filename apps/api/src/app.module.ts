@@ -13,6 +13,7 @@ import { CommentsModule } from './modules/comments/comments.module';
 import { ClassesModule } from './modules/classes/classes.module';
 import { VersionsModule } from './modules/versions/versions.module';
 import { DiagramsModule } from './modules/diagrams/diagrams.module';
+import { AiModule } from './modules/ai/ai.module';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -61,6 +62,7 @@ import { HealthController } from './health.controller';
     ClassesModule,
     VersionsModule,
     DiagramsModule,
+    AiModule,
   ],
   controllers: [HealthController],
 })
