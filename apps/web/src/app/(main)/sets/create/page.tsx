@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Trash2, Save, ArrowLeft, GripVertical, Image, Mic } from 'lucide-react';
+import { Plus, Trash2, Save, ArrowLeft, GripVertical, Image, Mic, Upload, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { ImportExportModal } from '@/components/study';
+import { ImportCard } from '@/lib/utils/importExport';
 
 interface Card {
   id: string;
@@ -21,6 +23,7 @@ export default function CreateStudySetPage() {
     { id: '2', term: '', definition: '' },
   ]);
   const [isSaving, setIsSaving] = useState(false);
+  const [showImportExport, setShowImportExport] = useState(false);
 
   const addCard = () => {
     setCards([
@@ -41,6 +44,15 @@ export default function CreateStudySetPage() {
         card.id === id ? { ...card, [field]: value } : card
       )
     );
+  };
+
+  const handleImport = (importedCards: ImportCard[]) => {
+    const newCards = importedCards.map((card, i) => ({
+      id: `imported-${Date.now()}-${i}`,
+      term: card.term,
+      definition: card.definition,
+    }));
+    setCards([...cards, ...newCards]);
   };
 
   const handleSave = async () => {
@@ -80,10 +92,16 @@ export default function CreateStudySetPage() {
           <ArrowLeft className="w-5 h-5" />
           Back
         </button>
-        <Button onClick={handleSave} disabled={isSaving}>
-          <Save className="w-4 h-4 mr-2" />
-          {isSaving ? 'Saving...' : 'Save'}
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" onClick={() => setShowImportExport(true)}>
+            <Upload className="w-4 h-4 mr-2" />
+            Import
+          </Button>
+          <Button onClick={handleSave} disabled={isSaving}>
+            <Save className="w-4 h-4 mr-2" />
+            {isSaving ? 'Saving...' : 'Save'}
+          </Button>
+        </div>
       </div>
 
       {/* Study Set Info */}
@@ -143,7 +161,7 @@ export default function CreateStudySetPage() {
 
         {/* Card List */}
         <div className="space-y-3">
-          {cards.map((card, index) => (
+          {cards.map((card) => (
             <div
               key={card.id}
               className="grid grid-cols-12 gap-4 items-center p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
@@ -198,6 +216,28 @@ export default function CreateStudySetPage() {
           <Plus className="w-5 h-5" />
           Add another card
         </button>
+
+        {/* Import/Export */}
+        <div className="mt-6 pt-6 border-t">
+          <div className="flex gap-4">
+            <button
+              onClick={() => setShowImportExport(true)}
+              className="flex items-center gap-2 px-4 py-2 text-sky-600 hover:bg-sky-50 rounded-lg transition-colors"
+            >
+              <Upload className="w-4 h-4" />
+              Import from CSV
+            </button>
+            {cards.length > 0 && (
+              <button
+                onClick={() => setShowImportExport(true)}
+                className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <Download className="w-4 h-4" />
+                Export to CSV
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Tips */}
@@ -210,6 +250,15 @@ export default function CreateStudySetPage() {
           <li>• Create your own cards for better retention</li>
         </ul>
       </div>
+
+      {/* Import/Export Modal */}
+      <ImportExportModal
+        isOpen={showImportExport}
+        onClose={() => setShowImportExport(false)}
+        cards={cards.map((c) => ({ id: c.id, term: c.term, definition: c.definition }))}
+        studySetTitle={title || 'Study Set'}
+        onImport={handleImport}
+      />
     </div>
   );
 }
