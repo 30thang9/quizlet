@@ -1,0 +1,110 @@
+# ===========================================
+# QUIZLET - Docker Compose Example
+# ===========================================
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: quizlet-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-quizlet}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: quizlet-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # API Service (NestJS)
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    container_name: quizlet-api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      API_PREFIX: /v1
+      CORS_ORIGINS: http://web:4000
+      THROTTLE_TTL: 60000
+      THROTTLE_LIMIT: 100
+      
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USERNAME: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      DB_DATABASE: ${POSTGRES_DB:-quizlet}
+      
+      REDIS_URL: redis://redis:6379
+      
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      
+      # AI Providers
+      AI_PROVIDER: ${AI_PROVIDER:-openai}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      
+      SWAGGER_ENABLED: "true"
+      SWAGGER_PATH: api/docs
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Web App (Next.js)
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    container_name: quizlet-web
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: http://api:3000/v1
+      API_TIMEOUT: 30000
+      AUTH_TOKEN_KEY: accessToken
+      AUTH_REFRESH_KEY: refreshToken
+      NEXT_PUBLIC_ENABLE_AI: "true"
+      NEXT_PUBLIC_ENABLE_DIAGRAMS: "true"
+      NEXT_PUBLIC_ENABLE_COMMENTS: "true"
+      NEXT_PUBLIC_ENABLE_CLASSES: "true"
+      DEFAULT_PAGE_SIZE: "20"
+      MAX_PAGE_SIZE: "100"
+    ports:
+      - "4000:4000"
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
+  redis_data:

@@ -13,6 +13,7 @@ import { CommentsModule } from './modules/comments/comments.module';
 import { ClassesModule } from './modules/classes/classes.module';
 import { VersionsModule } from './modules/versions/versions.module';
 import { DiagramsModule } from './modules/diagrams/diagrams.module';
+import { AiModule } from './modules/ai/ai.module';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -43,12 +44,13 @@ import { HealthController } from './health.controller';
     }),
 
     // Rate limiting
-    ThrottlerModule.forRoot([
-      {
-        ttl: 60000,
-        limit: 100,
-      },
-    ]),
+    ThrottlerModule.forRootAsync({
+      useFactory: (config: ConfigService) => ([{
+        ttl: config.get<number>('THROTTLE_TTL', 60000),
+        limit: config.get<number>('THROTTLE_LIMIT', 100),
+      }]),
+      inject: [ConfigService],
+    }),
 
     // Feature modules
     AuthModule,
@@ -61,6 +63,7 @@ import { HealthController } from './health.controller';
     ClassesModule,
     VersionsModule,
     DiagramsModule,
+    AiModule,
   ],
   controllers: [HealthController],
 })

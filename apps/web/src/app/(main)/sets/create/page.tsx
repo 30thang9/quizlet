@@ -2,11 +2,12 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Trash2, Save, ArrowLeft, GripVertical, Image, Mic, Upload, Download } from 'lucide-react';
+import { Plus, Trash2, Save, ArrowLeft, GripVertical, Image, Mic, Upload, Download, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ImportExportModal } from '@/components/study';
 import { ImportCard } from '@/lib/utils/importExport';
+import { AIGenerator } from '@/components/ai';
 
 interface Card {
   id: string;
@@ -24,6 +25,7 @@ export default function CreateStudySetPage() {
   ]);
   const [isSaving, setIsSaving] = useState(false);
   const [showImportExport, setShowImportExport] = useState(false);
+  const [showAIGenerator, setShowAIGenerator] = useState(false);
 
   const addCard = () => {
     setCards([
@@ -53,6 +55,16 @@ export default function CreateStudySetPage() {
       definition: card.definition,
     }));
     setCards([...cards, ...newCards]);
+  };
+
+  const handleAIImport = (aiCards: { term: string; definition: string; hint?: string }[]) => {
+    const newCards = aiCards.map((card, i) => ({
+      id: `ai-${Date.now()}-${i}`,
+      term: card.term,
+      definition: card.definition,
+    }));
+    setCards([...cards, ...newCards]);
+    setShowAIGenerator(false);
   };
 
   const handleSave = async () => {
@@ -93,6 +105,10 @@ export default function CreateStudySetPage() {
           Back
         </button>
         <div className="flex items-center gap-3">
+          <Button variant="outline" onClick={() => setShowAIGenerator(true)}>
+            <Sparkles className="w-4 h-4 mr-2" />
+            AI Generate
+          </Button>
           <Button variant="outline" onClick={() => setShowImportExport(true)}>
             <Upload className="w-4 h-4 mr-2" />
             Import
@@ -259,6 +275,18 @@ export default function CreateStudySetPage() {
         studySetTitle={title || 'Study Set'}
         onImport={handleImport}
       />
+
+      {/* AI Generator Modal */}
+      {showAIGenerator && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <AIGenerator
+              onAddCards={handleAIImport}
+              onClose={() => setShowAIGenerator(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

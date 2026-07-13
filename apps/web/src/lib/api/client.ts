@@ -261,6 +261,33 @@ export const apiEndpoints = {
     reorderLabels: (diagramId: string, data: { labelIds: string[] }) =>
       api.put(`/diagrams/${diagramId}/labels/reorder`, data),
   },
+
+  // AI
+  ai: {
+    generateFlashcards: (data: {
+      content: string;
+      cardCount?: number;
+      difficulty?: 'basic' | 'intermediate' | 'advanced';
+      includeHints?: boolean;
+      provider?: 'openai' | 'gemini' | 'claude';
+    }) => api.post('/ai/generate-flashcards', data),
+    generateSummary: (data: { content: string; maxLength?: number; provider?: string }) =>
+      api.post<{ summary: string }>('/ai/generate-summary', data),
+    generateQuiz: (data: {
+      content: string;
+      questionCount?: number;
+      type?: 'multiple_choice' | 'true_false';
+      provider?: string;
+    }) => api.post<{ questions: any[] }>('/ai/generate-quiz', data),
+    enhanceFlashcards: (data: {
+      cards: { term: string; definition: string }[];
+      provider?: string;
+    }) => api.post('/ai/enhance-flashcards', data),
+    answer: (data: { question: string; context: string; provider?: string }) =>
+      api.post<{ answer: string }>('/ai/answer', data),
+    magicNotes: (data: { content: string; cardCount?: number; provider?: string }) =>
+      api.post<{ summary: string; flashcards: any[] }>('/ai/magic-notes', data),
+  },
 } as const;
 
 export type ApiEndpoints = typeof apiEndpoints;
