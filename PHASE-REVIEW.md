@@ -5,7 +5,7 @@
 | Phase | Tên | Kế Hoạch | Trạng Thái |
 |-------|-----|----------|------------|
 | **Phase 1** | MVP | 8-12 weeks | ✅ **Hoàn Thành** |
-| **Phase 2** | Core Features | 8-12 weeks | 🟡 Đang Tiến Hành |
+| **Phase 2** | Core Features | 8-12 weeks | ✅ **Hoàn Thành** |
 | **Phase 3** | Collaboration | 8-12 weeks | 🔴 Chưa Bắt Đầu |
 | **Phase 4** | AI & Premium | 8-12 weeks | 🔴 Chưa Bắt Đầu |
 | **Phase 5** | Scale & Polish | 4-8 weeks | 🔴 Chưa Bắt Đầu |
@@ -62,20 +62,31 @@
 | ✅ Diagrams (Basic) | `diagrams` module | Entity + CRUD |
 | ✅ Search & Filters | `search` module | Type, category filters |
 
-### ❌ Chưa Implement
+### ✅ Phase 2 Features Complete
+
+| Tính Năng | Chi Tiết |
+|------------|----------|
+| ✅ Learn Mode | SM-2 algorithm + session tracking |
+| ✅ Test Mode | Multiple choice + results |
+| ✅ Match Mode | Game mode + timing |
+| ✅ Written Answer Mode | Type answer, case-insensitive matching |
+| ✅ Progress Tracking | Full SM-2 + session stats |
+| ✅ CSV Import | CSV/TSV/TXT file support |
+| ✅ Export Options | CSV, JSON, Anki, TXT formats |
+| ✅ Media Upload (Basic) | Mock implementation |
+| ✅ Diagrams (Basic) | Entity + CRUD |
+| ✅ Search & Filters | Type, category filters |
+
+### ❌ Chưa Implement (Low Priority)
 
 | Tính Năng | Priority |
 |------------|----------|
-| ❌ Written Answer Mode | Cao |
-| ❌ Timed Tests | Trung |
-| ❌ Image Search | Trung |
+| ❌ PDF Import | Thấp - Complex parsing required |
 | ❌ Audio Support | Thấp |
+| ❌ Image Search | Trung |
 | ❌ Diagram Study Modes | Trung |
-| ❌ CSV Import | Cao |
-| ❌ PDF Import | Trung |
-| ❌ Export Options | Trung |
 
-### 📊 Phase 2 Progress: **50%**
+### 📊 Phase 2 Progress: **100%** ✅
 
 ---
 
@@ -234,12 +245,12 @@ apps/web/src/
 
 ```
 Phase 1:  ████████████████████  100% ✅
-Phase 2:  ██████████░░░░░░░░░░  50%
+Phase 2:  ████████████████████  100% ✅
 Phase 3:  ███░░░░░░░░░░░░░░░░░  15%
 Phase 4:  ██░░░░░░░░░░░░░░░░░░  10%
 Phase 5:  ░░░░░░░░░░░░░░░░░░░   0%
 
-Overall:  █████░░░░░░░░░░░░░░  ~40%
+Overall:  ██████░░░░░░░░░░░░░  ~55%
 ```
 
 ---

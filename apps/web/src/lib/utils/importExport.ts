@@ -15,10 +15,11 @@ export interface ExportCard {
   imageUrl?: string;
 }
 
+export type ExportFormat = 'csv' | 'json' | 'txt' | 'anki';
+
 /**
- * Parse CSV content into cards
- * Supports format: term,definition
- * Or: term<tab>definition
+ * Parse CSV/TSV content into cards
+ * Supports format: term,definition or term<tab>definition
  */
 export function parseCSV(content: string): ImportResult {
   const cards: ImportCard[] = [];
@@ -113,6 +114,52 @@ export function exportToCSV(cards: ExportCard[]): string {
 }
 
 /**
+ * Export cards to JSON format
+ */
+export function exportToJSON(cards: ExportCard[]): string {
+  const exportData = {
+    exportDate: new Date().toISOString(),
+    cardCount: cards.length,
+    cards: cards.map(card => ({
+      front: card.term,
+      back: card.definition,
+    })),
+  };
+  return JSON.stringify(exportData, null, 2);
+}
+
+/**
+ * Export cards to Anki-compatible format
+ * Format: front<tab>back<tab>tags
+ */
+export function exportToAnki(cards: ExportCard[]): string {
+  return cards.map((card) => {
+    const front = card.term.replace(/\t/g, ' ').replace(/\n/g, '<br>');
+    const back = card.definition.replace(/\t/g, ' ').replace(/\n/g, '<br>');
+    return `${front}\t${back}`;
+  }).join('\n');
+}
+
+/**
+ * Export cards to plain text format
+ */
+export function exportToTXT(cards: ExportCard[]): string {
+  const header = '='.repeat(50);
+  return [
+    header,
+    'STUDY SET EXPORT',
+    header,
+    '',
+    ...cards.map((card, i) => `${i + 1}. ${card.term}\n   ${card.definition}`),
+    '',
+    header,
+    `Total cards: ${cards.length}`,
+    `Exported: ${new Date().toLocaleString()}`,
+    header,
+  ].join('\n');
+}
+
+/**
  * Escape a CSV field for proper formatting
  */
 function escapeCSVField(field: string): string {
@@ -125,20 +172,27 @@ function escapeCSVField(field: string): string {
 /**
  * Generate a filename for export
  */
-export function generateExportFilename(title: string): string {
+export function generateExportFilename(title: string, format: ExportFormat = 'csv'): string {
   const sanitized = title
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
   const timestamp = new Date().toISOString().split('T')[0];
-  return `${sanitized || 'study-set'}-${timestamp}.csv`;
+  return `${sanitized || 'study-set'}-${timestamp}.${format}`;
 }
 
 /**
  * Download content as a file
  */
-export function downloadFile(content: string, filename: string, mimeType = 'text/csv'): void {
-  const blob = new Blob([content], { type: mimeType });
+export function downloadFile(content: string, filename: string, mimeType?: string): void {
+  const mimeTypes: Record<string, string> = {
+    csv: 'text/csv',
+    json: 'application/json',
+    txt: 'text/plain',
+    anki: 'text/plain',
+  };
+  const type = mimeType || mimeTypes[filename.split('.').pop() || 'csv'] || 'text/plain';
+  const blob = new Blob([content], { type });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
@@ -147,6 +201,38 @@ export function downloadFile(content: string, filename: string, mimeType = 'text
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
+}
+
+/**
+ * Export study set with specified format
+ */
+export function exportStudySet(cards: ExportCard[], title: string, format: ExportFormat = 'csv'): void {
+  let content: string;
+  let filename: string;
+  
+  switch (format) {
+    case 'csv':
+      content = exportToCSV(cards);
+      filename = generateExportFilename(title, 'csv');
+      break;
+    case 'json':
+      content = exportToJSON(cards);
+      filename = generateExportFilename(title, 'json');
+      break;
+    case 'txt':
+      content = exportToTXT(cards);
+      filename = generateExportFilename(title, 'txt');
+      break;
+    case 'anki':
+      content = exportToAnki(cards);
+      filename = generateExportFilename(title, 'txt');
+      break;
+    default:
+      content = exportToCSV(cards);
+      filename = generateExportFilename(title, 'csv');
+  }
+  
+  downloadFile(content, filename);
 }
 
 /**
@@ -159,4 +245,12 @@ export function readFile(file: File): Promise<string> {
     reader.onerror = reject;
     reader.readAsText(file);
   });
+}
+
+/**
+ * Import cards from file
+ */
+export async function importFromFile(file: File): Promise<ImportResult> {
+  const content = await readFile(file);
+  return parseCSV(content);
 }
