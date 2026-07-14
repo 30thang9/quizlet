@@ -1,0 +1,282 @@
+/**
+ * Tailwind CSS Configuration
+ * 
+ * This file imports Tailwind's base, components, and utilities layers,
+ * along with custom component classes for the Quizlet application.
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import design tokens */
+@import './variables.css';
+
+/* ============ Base Layer Customizations ============ */
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-white text-neutral-900 dark:bg-neutral-900 dark:text-neutral-50;
+  }
+
+  /* Focus visible styles */
+  :focus-visible {
+    @apply outline-none ring-2 ring-primary-500 ring-offset-2 dark:ring-offset-neutral-900;
+  }
+
+  /* Selection styles */
+  ::selection {
+    @apply bg-primary-500/20 text-primary-900 dark:bg-primary-500/30 dark:text-primary-100;
+  }
+
+  /* Scrollbar styles */
+  ::-webkit-scrollbar {
+    @apply w-2 h-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-neutral-100 dark:bg-neutral-800;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-neutral-300 rounded-full dark:bg-neutral-600;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-neutral-400 dark:bg-neutral-500;
+  }
+}
+
+/* ============ Component Layer ============ */
+
+@layer components {
+  /* Container */
+  .container-app {
+    @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Card */
+  .card {
+    @apply rounded-xl border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-800;
+  }
+
+  .card-hover {
+    @apply transition-shadow hover:shadow-md;
+  }
+
+  /* Button base */
+  .btn {
+    @apply inline-flex items-center justify-center rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .btn-sm {
+    @apply h-8 px-3 text-sm;
+  }
+
+  .btn-md {
+    @apply h-10 px-4 text-sm;
+  }
+
+  .btn-lg {
+    @apply h-12 px-6 text-base;
+  }
+
+  /* Input */
+  .input {
+    @apply flex h-10 w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-50 dark:placeholder:text-neutral-500;
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+  }
+
+  .badge-primary {
+    @apply bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-300;
+  }
+
+  .badge-success {
+    @apply bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300;
+  }
+
+  .badge-warning {
+    @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300;
+  }
+
+  .badge-error {
+    @apply bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300;
+  }
+
+  /* Skeleton */
+  .skeleton {
+    @apply animate-pulse rounded-md bg-neutral-200 dark:bg-neutral-700;
+  }
+
+  /* Flashcard */
+  .flashcard {
+    @apply relative h-64 w-full cursor-pointer perspective-1000;
+  }
+
+  .flashcard-inner {
+    @apply relative h-full w-full transition-transform duration-500 transform-style-3d;
+  }
+
+  .flashcard-front,
+  .flashcard-back {
+    @apply absolute inset-0 flex items-center justify-center rounded-2xl p-6 backface-hidden shadow-lg;
+  }
+
+  .flashcard-front {
+    @apply bg-white dark:bg-neutral-800;
+  }
+
+  .flashcard-back {
+    @apply rotate-y-180 bg-primary-50 dark:bg-primary-950;
+  }
+
+  .flashcard-flipped .flashcard-inner {
+    @apply rotate-y-180;
+  }
+
+  /* Navigation */
+  .nav-link {
+    @apply flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-50;
+  }
+
+  .nav-link-active {
+    @apply bg-primary-50 text-primary-700 hover:bg-primary-100 dark:bg-primary-900/30 dark:text-primary-300 dark:hover:bg-primary-900/40;
+  }
+
+  /* Quiz option */
+  .quiz-option {
+    @apply flex w-full items-center gap-3 rounded-lg border-2 border-neutral-200 p-4 text-left transition-all hover:border-primary-300 hover:bg-primary-50/50 dark:border-neutral-700 dark:hover:border-primary-600 dark:hover:bg-primary-900/20;
+  }
+
+  .quiz-option-correct {
+    @apply border-green-500 bg-green-50 dark:border-green-600 dark:bg-green-900/30;
+  }
+
+  .quiz-option-incorrect {
+    @apply border-red-500 bg-red-50 dark:border-red-600 dark:bg-red-900/30;
+  }
+
+  /* Progress bar */
+  .progress-bar {
+    @apply h-2 w-full overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700;
+  }
+
+  .progress-bar-fill {
+    @apply h-full rounded-full bg-primary-500 transition-all duration-300;
+  }
+
+  /* Quiz progress indicator */
+  .quiz-progress {
+    @apply flex gap-1;
+  }
+
+  .quiz-progress-dot {
+    @apply h-3 w-3 rounded-full border-2 border-neutral-300 transition-colors dark:border-neutral-600;
+  }
+
+  .quiz-progress-dot-correct {
+    @apply border-green-500 bg-green-500;
+  }
+
+  .quiz-progress-dot-incorrect {
+    @apply border-red-500 bg-red-500;
+  }
+
+  .quiz-progress-dot-current {
+    @apply border-primary-500 bg-primary-500;
+  }
+
+  .quiz-progress-dot-unanswered {
+    @apply border-neutral-300 bg-transparent dark:border-neutral-600;
+  }
+}
+
+/* ============ Utilities Layer ============ */
+
+@layer utilities {
+  /* 3D transform utilities */
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+
+  .transform-style-3d {
+    transform-style: preserve-3d;
+  }
+
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+
+  .rotate-y-180 {
+    transform: rotateY(180deg);
+  }
+
+  /* Animation utilities */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* Text gradient */
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-500 to-primary-700;
+  }
+
+  /* Hide scrollbar */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}

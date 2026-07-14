@@ -1,591 +1,287 @@
 # 04 - Frontend Architecture (Next.js App Router)
 
-## 🎯 Tech Stack
+## Tech Stack
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    FRONTEND TECH STACK                            │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  Framework      │ Next.js 14+ (App Router)                     │
-│  Language       │ TypeScript 5.x                               │
-│  Styling        │ Tailwind CSS + CSS Modules                   │
-│  State          │ React Context + Zustand (optional)           │
-│  Forms          │ React Hook Form + Zod                       │
-│  Data Fetching  │ Server Components + TanStack Query           │
-│  UI Components  │ shadcn/ui (Radix + Tailwind)                │
-│  Testing        │ Vitest + React Testing Library + Playwright │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+| Category | Technology |
+|----------|------------|
+| Framework | Next.js 15+ (App Router) |
+| Language | TypeScript 5.x |
+| Styling | Tailwind CSS + CSS Modules |
+| State | React Context + Zustand (optional) |
+| Forms | React Hook Form + Zod |
+| Data Fetching | Server Components + TanStack Query |
+| UI Components | shadcn/ui (Radix + Tailwind) |
+| Testing | Vitest + React Testing Library + Playwright |
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 apps/web/
+├── public/                          # Static assets (served at root)
+│   ├── favicon.ico
+│   ├── robots.txt
+│   ├── sitemap.xml
+│   └── og-images/
+│       └── default-og.png
+│
 ├── src/
-│   ├── app/                        # App Router - Routing only
-│   │   ├── (auth)/                 # Route group - Authentication
-│   │   │   ├── login/
-│   │   │   │   ├── page.tsx
-│   │   │   │   └── loading.tsx
-│   │   │   ├── register/
-│   │   │   │   └── page.tsx
-│   │   │   └── layout.tsx
-│   │   │
-│   │   ├── (main)/                 # Route group - Main app
-│   │   │   ├── (dashboard)/
-│   │   │   │   ├── page.tsx        # /dashboard
-│   │   │   │   ├── loading.tsx
-│   │   │   │   └── _components/    # Route-local components
-│   │   │   │
-│   │   │   ├── study-sets/
-│   │   │   │   ├── page.tsx        # /study-sets
-│   │   │   │   ├── [id]/
-│   │   │   │   │   ├── page.tsx    # /study-sets/:id
-│   │   │   │   │   └── edit/
-│   │   │   │   │       └── page.tsx
-│   │   │   │   └── create/
-│   │   │   │       └── page.tsx
-│   │   │   │
-│   │   │   ├── classes/
-│   │   │   │   ├── page.tsx
-│   │   │   │   └── [id]/
-│   │   │   │       └── page.tsx
-│   │   │   │
-│   │   │   ├── study/
-│   │   │   │   ├── page.tsx
-│   │   │   │   └── [id]/
-│   │   │   │       └── page.tsx
-│   │   │   │
-│   │   │   └── profile/
-│   │   │       └── page.tsx
-│   │   │
-│   │   ├── layout.tsx              # Root layout
-│   │   ├── page.tsx               # Home page (/)
-│   │   ├── loading.tsx            # Root loading
-│   │   ├── error.tsx              # Root error boundary
-│   │   ├── not-found.tsx          # Root 404
-│   │   │
-│   │   └── api/                    # API routes (BFF pattern)
-│   │       ├── auth/
-│   │       │   └── [...nextauth]/
-│   │       │       └── route.ts
-│   │       └── proxy/
-│   │           └── route.ts
+│   ├── app/                         # App Router - Routing only
+│   │   ├── (auth)/                  # Route group - Authentication
+│   │   ├── (main)/                  # Route group - Main app
+│   │   └── api/                     # API routes (BFF pattern)
 │   │
-│   ├── components/                 # Shared UI components
-│   │   ├── ui/                    # shadcn/ui atomic components
-│   │   │   ├── button.tsx
-│   │   │   ├── input.tsx
-│   │   │   ├── card.tsx
-│   │   │   ├── dialog.tsx
-│   │   │   ├── dropdown-menu.tsx
-│   │   │   ├── form.tsx
-│   │   │   ├── badge.tsx
-│   │   │   └── ...
-│   │   │
-│   │   ├── layout/                # Layout components
-│   │   │   ├── header.tsx
-│   │   │   ├── sidebar.tsx
-│   │   │   ├── footer.tsx
-│   │   │   └── navbar.tsx
-│   │   │
-│   │   ├── auth/                  # Auth-related components
-│   │   │   ├── login-form.tsx
-│   │   │   ├── register-form.tsx
-│   │   │   └── social-login.tsx
-│   │   │
-│   │   ├── study/                 # Study-related components
-│   │   │   ├── flashcard.tsx
-│   │   │   ├── flashcard-deck.tsx
-│   │   │   ├── quiz-mode.tsx
-│   │   │   └── progress-bar.tsx
-│   │   │
-│   │   ├── study-sets/            # Study set components
-│   │   │   ├── study-set-card.tsx
-│   │   │   ├── study-set-grid.tsx
-│   │   │   └── card-editor.tsx
-│   │   │
-│   │   ├── search/                # Search components
-│   │   │   ├── search-bar.tsx
-│   │   │   └── search-results.tsx
-│   │   │
-│   │   ├── comments/              # Comment components
-│   │   │   ├── comment-list.tsx
-│   │   │   ├── comment-item.tsx
-│   │   │   └── comment-form.tsx
-│   │   │
-│   │   ├── tags/                  # Tag components
-│   │   │   ├── tag-list.tsx
-│   │   │   └── tag-input.tsx
-│   │   │
-│   │   ├── diagrams/              # Diagram components
-│   │   │   └── diagram-viewer.tsx
-│   │   │
-│   │   ├── media/                 # Media components
-│   │   │   ├── image-upload.tsx
-│   │   │   └── file-preview.tsx
-│   │   │
-│   │   └── ai/                    # AI components
-│   │       ├── ai-generator.tsx
-│   │       └── smart-suggestions.tsx
+│   ├── features/                    # Feature-based modules
+│   │   ├── auth/
+│   │   ├── users/
+│   │   ├── study-sets/
+│   │   ├── classes/
+│   │   ├── study/
+│   │   ├── dashboard/
+│   │   ├── settings/
+│   │   ├── billing/
+│   │   ├── notifications/
+│   │   ├── search/
+│   │   ├── folders/
+│   │   ├── ai/
+│   │   ├── import/
+│   │   └── tags/
+│   │   # Each feature has: api/, actions/, components/, hooks/,
+│   │   # queries/, mutations/, services/, validators/, schemas/,
+│   │   # constants/, permissions/, types/, utils/, store/
 │   │
-│   ├── hooks/                     # Global custom hooks
-│   │   ├── index.ts
-│   │   ├── useApi.ts              # API fetching hook
-│   │   ├── useAuth.ts             # Auth context hook
-│   │   ├── useDebounce.ts
-│   │   ├── useLocalStorage.ts
-│   │   └── useMediaQuery.ts
+│   ├── shared/                      # Shared/reusable code
+│   │   ├── components/ui/          # shadcn/ui atomic components
+│   │   ├── components/layout/      # Layout components
+│   │   ├── components/form/        # Form components
+│   │   ├── hooks/                 # Shared React hooks
+│   │   ├── lib/api/                # API client
+│   │   ├── utils/                  # Utility functions
+│   │   ├── types/                  # TypeScript types
+│   │   └── config/                 # Configuration
 │   │
-│   ├── lib/                       # Utilities & configurations
-│   │   ├── api/                   # API client
-│   │   │   ├── client.ts          # Axios/fetch client
-│   │   │   ├── auth.ts            # Auth API
-│   │   │   ├── study-sets.ts      # Study sets API
-│   │   │   ├── users.ts           # Users API
-│   │   │   └── ...
-│   │   │
-│   │   ├── utils/                 # Utility functions
-│   │   │   ├── cn.ts              # classnames utility
-│   │   │   ├── formatDate.ts
-│   │   │   └── ...
-│   │   │
-│   │   ├── validations/           # Zod schemas
-│   │   │   ├── auth.schema.ts
-│   │   │   ├── study-set.schema.ts
-│   │   │   └── ...
-│   │   │
-│   │   └── constants.ts
+│   ├── assets/                      # Processed assets (bundled)
+│   │   ├── images/
+│   │   ├── icons/
+│   │   ├── fonts/
+│   │   └── svg/
 │   │
-│   ├── types/                     # Global TypeScript types
-│   │   ├── api/                   # API response types
-│   │   │   ├── auth.types.ts
-│   │   │   ├── study-set.types.ts
-│   │   │   └── ...
-│   │   │
-│   │   ├── index.ts
-│   │   └── global.d.ts
+│   ├── styles/                      # Global styles
+│   │   ├── variables.css
+│   │   └── tailwind.css
 │   │
-│   ├── providers.tsx              # React providers (optional)
-│   └── styles/
-│       └── globals.css            # Global styles + Tailwind
-│
-├── public/                        # Static assets
-│   ├── images/
-│   ├── fonts/
-│   └── favicon.ico
-│
-├── components.json                # shadcn/ui config
-├── tailwind.config.ts
-├── tsconfig.json
-├── next.config.js
-├── vitest.config.ts
-└── package.json
+│   ├── middleware.ts                # Next.js middleware
+│   ├── env.ts                       # Environment validation
+│   └── instrumentation.ts            # OpenTelemetry setup
 ```
 
 ---
 
-## 🏗️ Key Concepts
+## Static Assets: `public/` vs `src/assets/`
 
-### App Router vs Pages Router
+### When to Use `public/`
+
+Files that should be **served directly** at a specific URL path:
 
 ```
-Pages Router (legacy)          App Router (recommended)
-─────────────────────         ───────────────────────
-pages/                        app/
-├── api/                      ├── page.tsx
-├── _app.tsx                  ├── layout.tsx
-└── _document.tsx             └── loading.tsx/error.tsx
-
-- Client Components           - Server Components (default)
-- getServerSideProps          - async page.tsx
-- getStaticProps              - generateStaticParams
+public/
+├── favicon.ico                      # Accessible at /favicon.ico
+├── robots.txt                       # Accessible at /robots.txt
+├── sitemap.xml                      # Accessible at /sitemap.xml
+├── og-images/                       # OG images for social sharing
+│   └── default-og.png              # Accessible at /og-images/default-og.png
+└── static/                          # Static files for download
+    └── sample-deck.pdf
 ```
 
-### Route Groups
+**Use cases:**
+- Favicon, robots.txt, sitemap
+- OG images for meta tags
+- Static files that don't change
+- Files needed via direct URL (`<img src="/og-images/...">`)
 
-```typescript
-// (auth)/login/page.tsx     → URL: /login
-// (main)/dashboard/page.tsx  → URL: /dashboard
+### When to Use `src/assets/`
 
-// Route groups don't affect URL
-// Used for grouping layouts and shared UI
+Files that should be **imported and processed** by the bundler:
+
+```
+src/assets/
+├── images/                          # Images imported in components
+│   ├── logo.png                     # import Logo from '@/assets/images/logo.png'
+│   └── patterns/
+├── icons/                           # SVG icons as React components
+│   ├── CheckIcon.tsx
+│   └── CloseIcon.tsx
+├── fonts/                           # Custom fonts
+│   └── CustomFont.woff2
+└── svg/                             # SVG assets
+    └── loading-spinner.svg
+```
+
+**Use cases:**
+- Images used with `next/image` optimization
+- Icons imported as React components
+- Custom fonts via CSS `@font-face`
+- Any asset that needs bundler processing (hashing, optimization)
+
+### Quick Decision Guide
+
+| Question | Answer | Use |
+|----------|--------|-----|
+| Needs direct URL access? | Yes | `public/` |
+| Should be optimized by Next.js? | Yes | `src/assets/` + `next/image` |
+| Will be imported in TypeScript? | Yes | `src/assets/` |
+| Needs cache busting (hashing)? | Yes | `src/assets/` |
+| Static file, never changes? | Yes | `public/` |
+| SVG used as React component? | Yes | `src/assets/icons/` |
+
+---
+
+## Feature Module Structure
+
+Each feature is a self-contained module:
+
+```
+features/{feature-name}/
+├── api/              # API client functions
+├── actions/         # Server Actions
+├── components/      # Feature-specific components
+├── hooks/           # Feature-specific hooks
+├── queries/         # TanStack Query definitions
+├── mutations/       # TanStack Mutation definitions
+├── services/        # Business logic services
+├── validators/      # Validation functions
+├── schemas/         # Zod schemas
+├── constants/       # Feature constants
+├── permissions/     # Permission definitions
+├── types/           # TypeScript types
+├── utils/           # Utility functions
+├── store/           # State management (Zustand, etc.)
+├── index.ts         # Barrel exports
+└── README.md        # Feature documentation
+```
+
+---
+
+## Key Patterns
+
+### Route Group Convention
+
+```
+app/
+├── (auth)/           # No URL prefix - auth routes
+│   ├── login/
+│   └── register/
+├── (main)/           # No URL prefix - main app
+│   ├── dashboard/
+│   └── settings/
+└── (marketing)/      # Optional - marketing pages
+    ├── about/
+    └── pricing/
 ```
 
 ### Server vs Client Components
 
 ```typescript
-// app/dashboard/page.tsx - Server Component (default)
-// No 'use client' directive needed
+// app/study-sets/page.tsx - Server Component (default)
+// Can fetch data directly, no 'use client' needed
 
-export default async function DashboardPage() {
-  const data = await fetchData(); // Direct DB/API call
-  return <div>{data.title}</div>;
-}
+// app/study-sets/study-set-card.tsx - Client Component
+'use client';
+// Use hooks, event handlers, interactivity
 ```
 
+### Import Conventions
+
 ```typescript
-// components/counter.tsx - Client Component
-'use client';
+// Shared UI components
+import { Button } from '@/shared/components/ui';
 
-import { useState } from 'react';
+// Feature components
+import { StudySetCard } from '@/features/study-sets/components';
 
-export function Counter() {
-  const [count, setCount] = useState(0);
-  return (
-    <button onClick={() => setCount(c => c + 1)}>
-      Count: {count}
-    </button>
-  );
-}
+// Shared utilities
+import { cn, formatDate } from '@/shared/utils';
+
+// Shared hooks
+import { useDebounce } from '@/shared/hooks';
+
+// Feature hooks
+import { useStudySession } from '@/features/study/hooks';
 ```
 
 ---
 
-## 📝 Component Patterns
+## Component Classification
 
-### shadcn/ui Component
+### 1. UI Components (`shared/components/ui/`)
+Base atomic components from shadcn/ui:
+- Button, Input, Card, Dialog, DropdownMenu
+- Badge, Avatar, Skeleton
+- Form, Label, Textarea
 
-```typescript
-// components/ui/button.tsx
-import { ButtonHTMLAttributes, forwardRef } from 'react';
-import { cn } from '@/lib/utils';
+### 2. Layout Components (`shared/components/layout/`)
+Global layout elements:
+- Header, Footer, Sidebar, Navbar
 
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
-  size?: 'default' | 'sm' | 'lg' | 'icon';
-}
+### 3. Feature Components (`features/*/components/`)
+Feature-specific components:
+- Flashcard, QuizMode, StudyProgress
+- StudySetCard, CardEditor
+- SearchBar, SearchResults
 
-const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'default', size = 'default', ...props }, ref) => {
-    return (
-      <button
-        className={cn(
-          'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors',
-          'focus-visible:outline-none focus-visible:ring-2',
-          'disabled:pointer-events-none disabled:opacity-50',
-          // Variants
-          variant === 'default' && 'bg-primary text-primary-foreground hover:bg-primary/90',
-          variant === 'destructive' && 'bg-destructive text-destructive-foreground',
-          // Sizes
-          size === 'default' && 'h-10 px-4 py-2',
-          size === 'sm' && 'h-9 rounded-md px-3',
-          size === 'lg' && 'h-11 rounded-md px-8',
-          className
-        )}
-        ref={ref}
-        {...props}
-      />
-    );
-  }
-);
+### 4. Route Components (`app/**/page.tsx`)
+Pages that match routes
 
-Button.displayName = 'Button';
-export { Button };
-```
+---
+
+## Configuration Files
+
+### middleware.ts
+Handles authentication guards and redirects.
+
+### env.ts
+Type-safe environment variables with Zod validation.
+
+### instrumentation.ts
+OpenTelemetry tracing setup.
+
+---
+
+## Checklist When Creating Components
+
+### Shared Component
+
+- [ ] Create file in `shared/components/{category}/`
+- [ ] Add `'use client'` directive if needed
+- [ ] Use UI components from `shared/components/ui/`
+- [ ] Export component and props interface
+- [ ] Write unit tests
 
 ### Feature Component
 
-```typescript
-// components/study-sets/study-set-card.tsx
-'use client';
+- [ ] Create file in `features/{feature}/components/`
+- [ ] Follow feature component patterns
+- [ ] Import shared utilities
+- [ ] Export from feature index.ts
 
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { StudySet } from '@/types/api';
+### Page
 
-interface StudySetCardProps {
-  studySet: StudySet;
-  onEdit?: (id: string) => void;
-  onDelete?: (id: string) => void;
-}
-
-export function StudySetCard({ studySet, onEdit, onDelete }: StudySetCardProps) {
-  return (
-    <Card className="hover:shadow-lg transition-shadow">
-      <CardHeader>
-        <h3 className="font-semibold">{studySet.title}</h3>
-        <Badge variant="secondary">{studySet.cardsCount} cards</Badge>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm text-muted-foreground">
-          {studySet.description}
-        </p>
-      </CardContent>
-      <CardFooter className="flex gap-2">
-        <Button variant="outline" size="sm" onClick={() => onEdit?.(studySet.id)}>
-          Edit
-        </Button>
-        <Button variant="destructive" size="sm" onClick={() => onDelete?.(studySet.id)}>
-          Delete
-        </Button>
-      </CardFooter>
-    </Card>
-  );
-}
-```
-
-### Layout Component
-
-```typescript
-// components/layout/header.tsx
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-
-export function Header() {
-  return (
-    <header className="border-b">
-      <div className="container flex h-16 items-center justify-between">
-        <Link href="/" className="font-bold text-xl">
-          Quizlet Clone
-        </Link>
-        
-        <nav className="flex items-center gap-4">
-          <Link href="/study-sets">
-            <Button variant="ghost">Study Sets</Button>
-          </Link>
-          <Link href="/classes">
-            <Button variant="ghost">Classes</Button>
-          </Link>
-          <Link href="/dashboard">
-            <Button>Get Started</Button>
-          </Link>
-        </nav>
-      </div>
-    </header>
-  );
-}
-```
+- [ ] Create folder in `app/{route}/`
+- [ ] Create `page.tsx` for UI
+- [ ] Add `loading.tsx` for suspense (optional)
+- [ ] Add `error.tsx` for error boundary (optional)
+- [ ] Prefer Server Components when possible
 
 ---
 
-## 🎣 Hook Patterns
+## Resources
 
-### API Hook
-
-```typescript
-// hooks/useApi.ts
-import { useState, useCallback } from 'react';
-
-interface UseApiState<T> {
-  data: T | null;
-  loading: boolean;
-  error: Error | null;
-}
-
-export function useApi<T>(apiFunction: () => Promise<T>) {
-  const [state, setState] = useState<UseApiState<T>>({
-    data: null,
-    loading: false,
-    error: null,
-  });
-
-  const execute = useCallback(async () => {
-    setState({ data: null, loading: true, error: null });
-    try {
-      const data = await apiFunction();
-      setState({ data, loading: false, error: null });
-    } catch (error) {
-      setState({ data: null, loading: false, error: error as Error });
-    }
-  }, [apiFunction]);
-
-  return { ...state, execute };
-}
-```
-
-### Auth Hook
-
-```typescript
-// hooks/useAuth.ts
-import { useContext } from 'react';
-import { AuthContext } from '@/providers/auth-provider';
-
-export function useAuth() {
-  const context = useContext(AuthContext);
-  
-  if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
-  }
-  
-  return context;
-}
-
-// Usage
-// const { user, login, logout, isLoading } = useAuth();
-```
-
----
-
-## 📡 API Client Pattern
-
-```typescript
-// lib/api/client.ts
-import axios from 'axios';
-
-const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// Request interceptor for auth token
-apiClient.interceptors.request.use((config) => {
-  const token = typeof window !== 'undefined' 
-    ? localStorage.getItem('accessToken') 
-    : null;
-  
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  
-  return config;
-});
-
-// Response interceptor for token refresh
-apiClient.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-    
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      
-      try {
-        const refreshToken = localStorage.getItem('refreshToken');
-        const { data } = await axios.post('/api/auth/refresh', { refreshToken });
-        
-        localStorage.setItem('accessToken', data.accessToken);
-        originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
-        
-        return apiClient(originalRequest);
-      } catch (refreshError) {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        window.location.href = '/login';
-      }
-    }
-    
-    return Promise.reject(error);
-  }
-);
-
-export default apiClient;
-```
-
-```typescript
-// lib/api/study-sets.ts
-import apiClient from './client';
-import { StudySet, CreateStudySetDto, UpdateStudySetDto } from '@/types/api';
-
-export const studySetsApi = {
-  list: async (params?: { page?: number; limit?: number }) => {
-    const { data } = await apiClient.get<{ data: StudySet[]; total: number }>(
-      '/study-sets',
-      { params }
-    );
-    return data;
-  },
-
-  getById: async (id: string) => {
-    const { data } = await apiClient.get<StudySet>(`/study-sets/${id}`);
-    return data;
-  },
-
-  create: async (dto: CreateStudySetDto) => {
-    const { data } = await apiClient.post<StudySet>('/study-sets', dto);
-    return data;
-  },
-
-  update: async (id: string, dto: UpdateStudySetDto) => {
-    const { data } = await apiClient.put<StudySet>(`/study-sets/${id}`, dto);
-    return data;
-  },
-
-  delete: async (id: string) => {
-    await apiClient.delete(`/study-sets/${id}`);
-  },
-};
-```
-
----
-
-## 🧪 Testing Pattern
-
-```typescript
-// components/__tests__/button.test.tsx
-import { render, screen } from '@testing-library/react';
-import { Button } from '../button';
-
-describe('Button', () => {
-  it('renders with default variant', () => {
-    render(<Button>Click me</Button>);
-    expect(screen.getByRole('button')).toBeInTheDocument();
-  });
-
-  it('applies custom className', () => {
-    render(<Button className="custom-class">Click me</Button>);
-    expect(screen.getByRole('button')).toHaveClass('custom-class');
-  });
-
-  it('handles click events', async () => {
-    const handleClick = jest.fn();
-    render(<Button onClick={handleClick}>Click me</Button>);
-    
-    await userEvent.click(screen.getByRole('button'));
-    expect(handleClick).toHaveBeenCalledTimes(1);
-  });
-});
-```
-
----
-
-## ✅ Checklist Khi Tạo Component Mới
-
-### Shared Component (components/)
-
-- [ ] Tạo file trong `components/{feature}/` folder
-- [ ] Thêm `'use client'` directive nếu cần interactivity
-- [ ] Sử dụng UI components từ `components/ui/`
-- [ ] Export component và props interface
-- [ ] Viết unit tests trong `__tests__/`
-
-### Page (app/)
-
-- [ ] Tạo folder trong `app/{route}/`
-- [ ] Tạo `page.tsx` cho UI
-- [ ] Thêm `loading.tsx` cho suspense state (optional)
-- [ ] Thêm `error.tsx` cho error boundary (optional)
-- [ ] Sử dụng Server Components khi có thể
-
-### API Client (lib/api/)
-
-- [ ] Tạo function trong `lib/api/{resource}.ts`
-- [ ] Định nghĩa TypeScript types trong `types/api/`
-- [ ] Sử dụng Zod cho runtime validation
-- [ ] Handle errors và loading states
-
-### Feature Module
-
-- [ ] Components trong `components/{feature}/`
-- [ ] Hooks trong `hooks/` hoặc `components/{feature}/`
-- [ ] API functions trong `lib/api/`
-- [ ] Types trong `types/api/`
-- [ ] Tests trong `__tests__/`
-
----
-
-## 📚 Resources
-
-- [Next.js 14 Documentation](https://nextjs.org/docs)
+- [Next.js Documentation](https://nextjs.org/docs)
 - [App Router](https://nextjs.org/docs/app)
 - [shadcn/ui](https://ui.shadcn.com/)
 - [Tailwind CSS](https://tailwindcss.com/)
+- [TanStack Query](https://tanstack.com/query)
 - [React Hook Form](https://react-hook-form.com/)
 - [Zod Validation](https://zod.dev/)
