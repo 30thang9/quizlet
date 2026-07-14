@@ -8,4 +8,6 @@ export { ImportExportModal } from './ImportExportModal';
 export { ExportModal } from './ExportModal';
 export { ImportModal } from './ImportModal';
 export { ShareModal } from './ShareModal';
-export type { Card } from './StudySession';
+
+// Re-export types
+export type { Card } from '@/types/api';

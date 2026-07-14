@@ -3,14 +3,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, X, Check, RotateCcw } from 'lucide-react';
 import { Flashcard } from './Flashcard';
+import type { Card } from '@/types/api';
 
-export interface Card {
-  id: string;
-  term: string;
-  definition: string;
-  imageUrl?: string;
-  hint?: string;
-}
+// Re-export Card type for convenience
+export type { Card };
 
 interface StudySessionProps {
   cards: Card[];

@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, BookOpen, Zap, Brain, FileText } from 'lucide-react';
-import { StudySession, MatchMode, LearnMode, TestMode, Card } from '@/components/study';
+import { ArrowLeft, BookOpen, Zap, Brain, FileText, PenLine } from 'lucide-react';
+import { StudySession, MatchMode, LearnMode, TestMode, WrittenMode, Card } from '@/components/study';
 
 // Demo data - in production this would come from API
 const demoStudySet = {
@@ -25,7 +25,7 @@ const demoStudySet = {
   ] as Card[],
 };
 
-type StudyMode = 'cards' | 'match' | 'learn' | 'test' | null;
+type StudyMode = 'cards' | 'match' | 'learn' | 'test' | 'write' | null;
 
 export default function StudyPage() {
   const params = useParams();
@@ -90,6 +90,17 @@ export default function StudyPage() {
     );
   }
 
+  if (mode === 'write') {
+    return (
+      <WrittenMode
+        cards={studySet.cards}
+        title={studySet.title}
+        timeLimit={0}
+        onExit={() => setMode(null)}
+      />
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto">
       {/* Header */}
@@ -107,7 +118,7 @@ export default function StudyPage() {
       </div>
 
       {/* Study Modes Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Cards Mode */}
         <button
           onClick={() => setMode('cards')}
@@ -161,6 +172,20 @@ export default function StudyPage() {
           <h3 className="text-xl font-bold text-gray-800 mb-2">Test</h3>
           <p className="text-gray-500">
             Take a multiple-choice quiz. See how well you know your material.
+          </p>
+        </button>
+
+        {/* Write Mode */}
+        <button
+          onClick={() => setMode('write')}
+          className="p-6 bg-white border-2 border-gray-200 rounded-2xl hover:border-indigo-500 hover:shadow-lg transition-all text-left group"
+        >
+          <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-indigo-500 transition-colors">
+            <PenLine className="w-6 h-6 text-indigo-500 group-hover:text-white transition-colors" />
+          </div>
+          <h3 className="text-xl font-bold text-gray-800 mb-2">Write</h3>
+          <p className="text-gray-500">
+            Type your answers to test your knowledge. Great for spelling practice.
           </p>
         </button>
       </div>
