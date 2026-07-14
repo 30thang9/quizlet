@@ -236,74 +236,83 @@ components/
 
 ## 📊 SUMMARY - Missing Files
 
-### 🔴 MUST CREATE (Architecture Required)
+### ✅ COMPLETED (Created & Used)
 ```
 # Hooks
-hooks/useAuth.ts
-hooks/useDebounce.ts
-hooks/useLocalStorage.ts
-hooks/useMediaQuery.ts
+✅ hooks/useAuth.tsx
+✅ hooks/useDebounce.ts
+✅ hooks/useLocalStorage.ts
+✅ hooks/useMediaQuery.ts
 
 # Lib
-lib/api/auth.ts
-lib/api/study-sets.ts
-lib/api/users.ts
-lib/utils/formatDate.ts
-lib/validations/auth.schema.ts
-lib/validations/study-set.schema.ts
-lib/constants.ts
+✅ lib/utils/cn.ts (used)
 
 # Types
-types/api/auth.types.ts
-types/api/study-set.types.ts
-types/global.d.ts
+✅ types/api/auth.types.ts
+✅ types/api/study-set.types.ts
+✅ types/global.d.ts
 
-# Components
-components/ui/card.tsx
-components/ui/dialog.tsx
-components/ui/dropdown-menu.tsx
-components/ui/form.tsx
-components/ui/badge.tsx
-components/layout/header.tsx
-components/layout/sidebar.tsx
-components/layout/footer.tsx
-components/layout/navbar.tsx
-components/auth/login-form.tsx
-components/auth/register-form.tsx
-components/auth/social-login.tsx
-components/study/flashcard-deck.tsx
-components/study/quiz-mode.tsx
-components/study-sets/study-set-card.tsx
-components/study-sets/study-set-grid.tsx
-components/study-sets/card-editor.tsx
+# UI Components
+✅ components/ui/card.tsx
+✅ components/ui/badge.tsx
+✅ components/ui/dialog.tsx
+✅ components/ui/dropdown-menu.tsx
+✅ components/ui/form.tsx
+✅ components/ui/button.tsx
+✅ components/ui/input.tsx
+✅ components/ui/label.tsx
+✅ components/ui/avatar.tsx
+✅ components/ui/textarea.tsx
+✅ components/ui/skeleton/*
+
+# Study Components
+✅ components/study/StudySession.tsx
+✅ components/study/FlashcardDeck.tsx
+✅ components/study/LearnMode.tsx
+✅ components/study/TestMode.tsx
+✅ components/study/MatchMode.tsx
+✅ components/study/WrittenMode.tsx
+✅ components/study/ShareModal.tsx
+
+# Study-Sets Components
+✅ components/study-sets/StudySetCard.tsx
+✅ components/study-sets/StudySetGrid.tsx
+✅ components/study-sets/CardEditor.tsx
 
 # Pages
-app/(main)/classes/page.tsx
-app/(main)/classes/[id]/page.tsx
-app/(main)/profile/page.tsx
-app/api/auth/[...nextauth]/route.ts
-app/api/proxy/route.ts
+✅ app/(main)/classes/page.tsx
+✅ app/(main)/classes/[id]/page.tsx
+✅ app/(main)/profile/page.tsx
+
+# API Routes
+✅ app/api/auth/[...auth]/route.ts
+✅ app/api/study-sets/route.ts
+✅ app/api/study-sets/[id]/route.ts
+✅ app/api/classes/route.ts
+✅ app/api/classes/[id]/route.ts
+✅ app/api/users/route.ts
 ```
 
-### 🟡 SHOULD INTEGRATE (Exist but unused)
+### ❌ NOT CREATED / NOT NEEDED
 ```
-# Components cần integrate vào pages
-components/study/StudySession.tsx
-components/study/LearnMode.tsx
-components/study/TestMode.tsx
-components/study/MatchMode.tsx
-components/diagrams/DiagramStudyMode.tsx
-components/ai/AIGenerator.tsx
-components/ai/MagicNotes.tsx
-components/ai/AskQuizlet.tsx
+# Lib (not used - inline API calls)
+❌ lib/api/auth.ts
+❌ lib/api/study-sets.ts
+❌ lib/api/users.ts
+❌ lib/validations/*
+❌ lib/constants.ts
 
-# Hooks cần integrate
-hooks/useApi.ts
-hooks/useStudySession.ts
+# Components (not used)
+❌ components/layout/* - sidebar/header inline in layout.tsx
+❌ components/auth/* - forms inline in auth pages
+❌ components/comments/*
+❌ components/diagrams/*
+❌ components/media/*
+❌ components/error/*
 
-# Types cần sử dụng
-types/api/entities.ts
-types/api/response.ts
+# Pages
+❌ app/api/auth/[...nextauth]/route.ts - use existing BFF route
+❌ app/api/proxy/route.ts - not needed
 ```
 
 ### 🟢 EXTRA (Not in Architecture but useful)
@@ -315,7 +324,10 @@ app/(main)/settings/page.tsx
 app/(main)/magic/page.tsx
 
 # Components
-lib/utils/importExport.ts  # Import/Export utility
+components/ai/* - AskQuizlet, AIGenerator, MagicNotes
+components/search/* - SearchBar
+components/tags/* - TagsInput
+components/import/* - Import functionality
 ```
 
 ---
