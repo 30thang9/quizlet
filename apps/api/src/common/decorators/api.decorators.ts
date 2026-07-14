@@ -4,7 +4,7 @@ import { ApiResponse as SwaggerApiResponse, ApiTags, ApiBearerAuth } from '@nest
 /**
  * Standard API documentation decorators
  */
-export function ApiDocumentation(tags: string[], description?: string) {
+export function ApiDocumentation(tags: string[], _description?: string) {
   return applyDecorators(ApiTags(...tags));
 }
 

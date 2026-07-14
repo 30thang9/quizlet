@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Trash2, Save, ArrowLeft, GripVertical, Image, Mic, Upload, Download, Sparkles, FileText } from 'lucide-react';
+import { Plus, Trash2, Save, ArrowLeft, GripVertical, Image as ImageIcon, Mic, Upload, Download, Sparkles, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ImportExportModal } from '@/components/study';
@@ -207,7 +207,7 @@ export default function CreateStudySetPage() {
                 />
                 <div className="flex gap-2 mt-2">
                   <button className="p-1 text-gray-400 hover:text-gray-600" title="Add image">
-                    <Image className="w-4 h-4" />
+                    <ImageIcon className="w-4 h-4" />
                   </button>
                   <button className="p-1 text-gray-400 hover:text-gray-600" title="Add audio">
                     <Mic className="w-4 h-4" />

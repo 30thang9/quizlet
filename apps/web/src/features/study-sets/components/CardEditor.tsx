@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, GripVertical, Image, Volume2, Save, X, Copy } from 'lucide-react';
+import { Plus, Trash2, GripVertical, Image as ImageIcon, Volume2, Save, X, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -209,7 +209,7 @@ export function CardEditor({
                     : 'border-gray-200 text-gray-500 hover:border-gray-300'
                 )}
               >
-                <Image className="h-3 w-3" />
+                <ImageIcon className="h-3 w-3" />
                 Image
               </button>
               <button

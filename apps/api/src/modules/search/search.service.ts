@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, ILike, MoreThan } from 'typeorm';
+import { Repository, ILike } from 'typeorm';
 import { StudySet } from '../study-sets/entities/study-set.entity';
 import { User } from '../users/entities/user.entity';
 import { Tag } from '../tags/entities/tag.entity';

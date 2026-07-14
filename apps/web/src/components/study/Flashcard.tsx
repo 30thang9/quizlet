@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { cn } from '@/lib/utils/cn';
 
 interface FlashcardProps {
@@ -33,9 +34,11 @@ export function Flashcard({ term, definition, imageUrl, onFlip }: FlashcardProps
         {/* Front - Term */}
         <div className="absolute inset-0 backface-hidden bg-white border-2 border-gray-200 rounded-2xl shadow-lg flex flex-col items-center justify-center p-6">
           {imageUrl && (
-            <img 
+            <Image 
               src={imageUrl} 
               alt={term}
+              width={400}
+              height={128}
               className="w-full h-32 object-contain mb-4 rounded-lg"
             />
           )}

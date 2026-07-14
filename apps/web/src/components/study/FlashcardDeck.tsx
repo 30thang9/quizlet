@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { ChevronLeft, ChevronRight, RotateCcw, Shuffle, Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils/cn';
@@ -135,9 +136,11 @@ export function FlashcardDeck({
             <span className="text-sm text-muted-foreground mb-2">Term</span>
             <p className="text-2xl font-bold text-center">{currentCard.term}</p>
             {currentCard.imageUrl && (
-              <img
+              <Image
                 src={currentCard.imageUrl}
                 alt={currentCard.term}
+                width={400}
+                height={128}
                 className="mt-4 max-h-32 object-contain rounded-lg"
               />
             )}

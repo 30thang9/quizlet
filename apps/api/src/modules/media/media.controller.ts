@@ -10,7 +10,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { MediaService } from './media.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
@@ -35,7 +35,7 @@ export class MediaController {
   @HttpCode(HttpStatus.OK)
   async getUploadUrl(
     @Body() dto: GetUploadUrlDto,
-    @Request() req: any,
+    @Request() _req: any,
   ) {
     // Check if S3 is configured
     if (!this.mediaService.isS3Configured()) {
@@ -61,7 +61,7 @@ export class MediaController {
   @Get('download-url/:key(*.+)')
   async getDownloadUrl(
     @Param('key') key: string,
-    @Request() req: any,
+    @Request() _req: any,
   ) {
     if (!this.mediaService.isS3Configured()) {
       return {
@@ -82,7 +82,7 @@ export class MediaController {
   @HttpCode(HttpStatus.OK)
   async deleteFile(
     @Body() dto: DeleteFileDto,
-    @Request() req: any,
+    @Request() _req: any,
   ) {
     if (!this.mediaService.isS3Configured()) {
       return {
@@ -100,7 +100,7 @@ export class MediaController {
   }
 
   @Get('config')
-  async getConfig(@Request() req: any) {
+  async getConfig(@Request() _req: any) {
     const allowedTypes = this.mediaService.getAllowedTypes();
 
     return {

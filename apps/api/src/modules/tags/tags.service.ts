@@ -98,7 +98,7 @@ export class TagsService {
   }
 
   async delete(id: string): Promise<void> {
-    const tag = await this.findById(id);
+    await this.findById(id);
     await this.tagRepository.delete(id);
   }
 

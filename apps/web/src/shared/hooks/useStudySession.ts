@@ -143,7 +143,7 @@ export function useStudySession(mode: StudyMode = 'flashcard') {
         endSession();
       }
     };
-  }, [state.session]);
+  }, [state.session, endSession]);
 
   return {
     // State

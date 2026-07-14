@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Comment, CommentableType } from './entities/comment.entity';
+import { Comment } from './entities/comment.entity';
 import { CommentLike } from './entities/comment-like.entity';
 import { CreateCommentDto, UpdateCommentDto } from './dto';
 
@@ -117,7 +117,7 @@ export class CommentsService {
   }
 
   async toggleLike(commentId: string, userId: string): Promise<{ liked: boolean }> {
-    const comment = await this.findById(commentId);
+    await this.findById(commentId);
 
     const existing = await this.likeRepository.findOne({
       where: { commentId, userId },

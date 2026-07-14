@@ -5,13 +5,11 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
-  ManyToMany,
   ManyToOne,
   JoinColumn,
   Index,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
-import { StudySet } from '../../study-sets/entities/study-set.entity';
 
 export enum ClassRole {
   OWNER = 'owner',

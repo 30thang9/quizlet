@@ -55,7 +55,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Request password reset email' })
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
-    const result = await this.authService.forgotPassword(dto);
+    await this.authService.forgotPassword(dto);
     return {
       success: true,
       message: 'If an account exists with this email, a password reset link has been sent.',
@@ -66,7 +66,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Reset password with token' })
   async resetPassword(@Body() dto: ResetPasswordDto) {
-    const result = await this.authService.resetPassword(dto);
+    await this.authService.resetPassword(dto);
     return {
       success: true,
       message: 'Password has been reset successfully. You can now login with your new password.',

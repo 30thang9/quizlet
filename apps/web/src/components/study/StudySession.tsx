@@ -53,17 +53,17 @@ export function StudySession({ cards, title, onComplete, onExit }: StudySessionP
     setIsComplete(false);
   };
 
-  const handlePrevious = () => {
+  const handlePrevious = useCallback(() => {
     if (currentIndex > 0) {
       setCurrentIndex((prev) => prev - 1);
     }
-  };
+  }, [currentIndex]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (currentIndex < cards.length - 1) {
       setCurrentIndex((prev) => prev + 1);
     }
-  };
+  }, [currentIndex, cards.length]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -85,7 +85,7 @@ export function StudySession({ cards, title, onComplete, onExit }: StudySessionP
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentIndex, isComplete]);
+  }, [isComplete, handlePrevious, handleNext]);
 
   if (cards.length === 0) {
     return (

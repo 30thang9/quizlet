@@ -49,11 +49,11 @@ export class MediaService {
     };
   }
 
-  async deleteFile(key: string): Promise<void> {
+  async deleteFile(_key: string): Promise<void> {
     // Implementation depends on storage provider
   }
 
-  async getSignedUrl(key: string, expiresIn: number = 3600): Promise<string> {
+  async getSignedUrl(key: string, _expiresIn: number = 3600): Promise<string> {
     return `/uploads/${key}`;
   }
 }

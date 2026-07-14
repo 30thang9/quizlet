@@ -1,7 +1,6 @@
 import {
   Injectable,
   NotFoundException,
-  ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
@@ -77,7 +76,7 @@ export class CardsService {
   }
 
   async delete(id: string): Promise<void> {
-    const card = await this.findById(id);
+    await this.findById(id);
     await this.cardRepository.delete(id);
   }
 

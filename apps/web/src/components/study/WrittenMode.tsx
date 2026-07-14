@@ -69,24 +69,6 @@ export function WrittenMode({ cards, title, studySetId, timeLimit = 0, onComplet
     }
   };
 
-  // Timer
-  useEffect(() => {
-    if (!isStarted || isComplete || isReviewMode || timeLimit === 0) return;
-
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          finishMode();
-          return 0;
-        }
-        return prev - 1;
-      });
-      setTimeSpent((prev) => prev + 1);
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [isStarted, isComplete, isReviewMode, timeLimit]);
-
   const normalizeAnswer = (answer: string, caseSensitive: boolean = false): string => {
     let normalized = answer.trim();
     if (!caseSensitive) {
@@ -139,10 +121,12 @@ export function WrittenMode({ cards, title, studySetId, timeLimit = 0, onComplet
       setShowHint(false);
       setTimeout(() => inputRef.current?.focus(), 100);
     } else {
-      finishMode();
+      finishModeRef.current();
     }
   };
 
+  // Use ref to avoid dependency issues with finishMode
+  const finishModeRef = useRef<() => void>(() => {});
   const finishMode = useCallback(async () => {
     setIsComplete(true);
     setIsReviewMode(true);
@@ -169,6 +153,32 @@ export function WrittenMode({ cards, title, studySetId, timeLimit = 0, onComplet
       timeSpent: totalTimeSpent,
     });
   }, [results, questions, timeLimit, timeLeft, timeSpent, sessionId, progress, onComplete]);
+
+  // Keep ref updated
+  useEffect(() => {
+    finishModeRef.current = () => {
+      setIsComplete(true);
+      setIsReviewMode(true);
+    };
+  }, []);
+
+  // Timer
+  useEffect(() => {
+    if (!isStarted || isComplete || isReviewMode || timeLimit === 0) return;
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          finishModeRef.current();
+          return 0;
+        }
+        return prev - 1;
+      });
+      setTimeSpent((prev) => prev + 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isStarted, isComplete, isReviewMode, timeLimit]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
