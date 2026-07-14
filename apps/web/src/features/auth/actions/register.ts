@@ -1,6 +1,6 @@
 'use server';
 
-import { apiEndpoints } from '@/lib/api/client';
+import { authApi } from '@/features/auth/api';
 import { storage, AUTH_CONFIG } from '@/shared/config';
 
 interface RegisterResult {
@@ -14,10 +14,10 @@ export async function registerAction(data: {
   name: string;
 }): Promise<RegisterResult> {
   try {
-    const response = await apiEndpoints.auth.register(data);
+    const response = await authApi.register(data);
     
-    storage.set(AUTH_CONFIG.TOKEN_KEY, response.accessToken);
-    storage.set(AUTH_CONFIG.REFRESH_TOKEN_KEY, response.refreshToken);
+    storage.set(AUTH_CONFIG.TOKEN_KEY, response.tokens.accessToken);
+    storage.set(AUTH_CONFIG.REFRESH_TOKEN_KEY, response.tokens.refreshToken);
     
     return { success: true };
   } catch (error: unknown) {

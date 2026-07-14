@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, GripVertical, Image as ImageIcon, Volume2, Save, X, Copy } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/shared/components/ui/button';
+import { Input } from '@/shared/components/ui/input';
+import { Textarea } from '@/shared/components/ui/textarea';
 import { cn } from '@/lib/utils/cn';
 
 export interface CardData {

@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { FileText, Clock, Check, X, Trophy, RotateCcw, ChevronRight } from 'lucide-react';
 import { Card } from './StudySession';
-import { useProgress } from '@/hooks/useProgress';
+import { useProgress } from '@/features/study/hooks/useProgress';
 
 interface TestModeProps {
   cards: Card[];

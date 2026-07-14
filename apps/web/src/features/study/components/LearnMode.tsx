@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Brain, X, BookOpen, Zap } from 'lucide-react';
 import { Card } from './StudySession';
-import { useProgress } from '@/hooks/useProgress';
+import { useProgress } from '@/features/study/hooks/useProgress';
 
 interface LearnCard extends Card {
   easeFactor: number;

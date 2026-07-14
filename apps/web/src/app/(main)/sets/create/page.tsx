@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Trash2, Save, ArrowLeft, GripVertical, Image as ImageIcon, Mic, Upload, Download, Sparkles, FileText } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Button } from '@/shared/components/ui/button';
+import { Input } from '@/shared/components/ui/input';
 import { ImportExportModal } from '@/features/study/components';
 import { ImportCard } from '@/lib/utils/importExport';
 import { AIGenerator } from '@/features/ai/components';

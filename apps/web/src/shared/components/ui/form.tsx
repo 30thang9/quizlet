@@ -4,7 +4,7 @@ import * as React from 'react';
 import { useForm, FormProvider, UseFormProps, UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ZodSchema, ZodError } from 'zod';
-import { cn } from '@/lib/utils/cn';
+import { cn } from '@/shared/utils';
 
 interface FormProps<T extends Record<string, any>>
   extends Omit<React.FormHTMLAttributes<HTMLFormElement>, 'onSubmit'> {

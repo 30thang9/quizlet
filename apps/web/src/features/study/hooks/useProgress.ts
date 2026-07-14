@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { apiEndpoints } from '@/lib/api/client';
+import { progressApi } from '@/lib/api/endpoints';
 
 export interface StudySession {
   id: string;
@@ -61,7 +61,7 @@ export function useProgress() {
     setLoading(true);
     setError(null);
     try {
-      const session = await apiEndpoints.progress.createSession(params);
+      const session = await progressApi.createSession(params);
       return session as unknown as StudySession;
     } catch (err: any) {
       setError(err.message || 'Failed to create session');
@@ -75,7 +75,7 @@ export function useProgress() {
     setLoading(true);
     setError(null);
     try {
-      await apiEndpoints.progress.endSession(sessionId, params);
+      await progressApi.endSession(sessionId, params);
       return true;
     } catch (err: any) {
       setError(err.message || 'Failed to end session');
@@ -89,7 +89,7 @@ export function useProgress() {
     setLoading(true);
     setError(null);
     try {
-      const progress = await apiEndpoints.progress.reviewCard(params);
+      const progress = await progressApi.reviewCard(params);
       return progress as unknown as CardProgress;
     } catch (err: any) {
       setError(err.message || 'Failed to review card');
@@ -103,7 +103,7 @@ export function useProgress() {
     setLoading(true);
     setError(null);
     try {
-      const progress = await apiEndpoints.progress.getCardProgress(cardId);
+      const progress = await progressApi.getCardProgress(cardId);
       return progress as unknown as CardProgress;
     } catch (err: any) {
       setError(err.message || 'Failed to get card progress');
@@ -117,7 +117,7 @@ export function useProgress() {
     setLoading(true);
     setError(null);
     try {
-      const result = await apiEndpoints.progress.getDueCards(params);
+      const result = await progressApi.getDueCards(params);
       return result as unknown as any[];
     } catch (err: any) {
       setError(err.message || 'Failed to get due cards');
@@ -131,7 +131,7 @@ export function useProgress() {
     setLoading(true);
     setError(null);
     try {
-      const progress = await apiEndpoints.progress.getStudySetProgress(studySetId);
+      const progress = await progressApi.getStudySetProgress(studySetId);
       return progress;
     } catch (err: any) {
       setError(err.message || 'Failed to get study set progress');
@@ -145,7 +145,7 @@ export function useProgress() {
     setLoading(true);
     setError(null);
     try {
-      const stats = await apiEndpoints.progress.getStats();
+      const stats = await progressApi.getStats();
       return stats as unknown as StudyStats;
     } catch (err: any) {
       setError(err.message || 'Failed to get stats');

@@ -7,7 +7,7 @@ import {
   Edit, Copy, Heart, MoreVertical, User, Clock,
   Plus, Trash2, Eye, MessageCircle, GitBranch
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/shared/components/ui/button';
 import { ShareModal } from '@/features/study/components';
 import { TagsInput } from '@/features/tags/components';
 import { AskQuizlet } from '@/features/ai/components';

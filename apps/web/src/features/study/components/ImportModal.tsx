@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { X, Upload, FileText, AlertCircle, Check, FileSpreadsheet } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/shared/components/ui/button';
 import { parseCSV, readFile, type ImportCard } from '@/lib/utils/importExport';
 
 interface ImportModalProps {

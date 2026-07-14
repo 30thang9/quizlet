@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { FileText, Upload, Loader2, AlertCircle, Check, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/shared/components/ui/button';
 
 interface ParsedCard {
   term: string;
