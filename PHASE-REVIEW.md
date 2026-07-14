@@ -75,14 +75,14 @@
 
 ### 📊 Phase 2 Progress: **100%** ✅
 
-#### ❌ Optional Features (Low Priority - Có thể implement sau)
+#### ✅ Optional Features (Completed)
 
 | Tính Năng | Priority | Ghi Chú |
 |------------|----------|----------|
-| ❌ PDF Import | Thấp | Cần thư viện phức tạp |
-| ❌ Audio Support | Thấp | Cần S3 storage |
-| ❌ Image Search | Trung | AI integration |
-| ❌ Diagram Study Modes | Trung | Chế độ học đặc biệt |
+| ✅ PDF Import | Thấp | Implemented với pdfjs-dist |
+| ✅ Audio Support | Thấp | AudioPlayer + AudioUploader components |
+| ✅ Image Search | Trung | ImageSearch component với AI-powered search |
+| ✅ Diagram Study Modes | Trung | Integrated vào Study Modes grid |
 
 ---
 

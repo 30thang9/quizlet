@@ -36,7 +36,8 @@
     "@radix-ui/react-toast": "^1.1.5",
     "class-variance-authority": "^0.7.0",
     "lucide-react": "^0.303.0",
-    "framer-motion": "^10.17.0"
+    "framer-motion": "^10.17.0",
+    "pdfjs-dist": "^4.0.379"
   },
   "devDependencies": {
     "@types/node": "^20.10.6",

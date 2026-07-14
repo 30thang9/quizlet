@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Trash2, Save, ArrowLeft, GripVertical, Image, Mic, Upload, Download, Sparkles } from 'lucide-react';
+import { Plus, Trash2, Save, ArrowLeft, GripVertical, Image, Mic, Upload, Download, Sparkles, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ImportExportModal } from '@/components/study';
 import { ImportCard } from '@/lib/utils/importExport';
 import { AIGenerator } from '@/components/ai';
+import { PDFImport } from '@/components/import/PDFImport';
 
 interface Card {
   id: string;
@@ -26,6 +27,7 @@ export default function CreateStudySetPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [showImportExport, setShowImportExport] = useState(false);
   const [showAIGenerator, setShowAIGenerator] = useState(false);
+  const [showPDFImport, setShowPDFImport] = useState(false);
 
   const addCard = () => {
     setCards([
@@ -65,6 +67,16 @@ export default function CreateStudySetPage() {
     }));
     setCards([...cards, ...newCards]);
     setShowAIGenerator(false);
+  };
+
+  const handlePDFImport = (importedCards: { term: string; definition: string }[]) => {
+    const newCards = importedCards.map((card, i) => ({
+      id: `pdf-${Date.now()}-${i}`,
+      term: card.term,
+      definition: card.definition,
+    }));
+    setCards([...cards, ...newCards]);
+    setShowPDFImport(false);
   };
 
   const handleSave = async () => {
@@ -235,13 +247,20 @@ export default function CreateStudySetPage() {
 
         {/* Import/Export */}
         <div className="mt-6 pt-6 border-t">
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-4">
             <button
               onClick={() => setShowImportExport(true)}
               className="flex items-center gap-2 px-4 py-2 text-sky-600 hover:bg-sky-50 rounded-lg transition-colors"
             >
               <Upload className="w-4 h-4" />
               Import from CSV
+            </button>
+            <button
+              onClick={() => setShowPDFImport(true)}
+              className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            >
+              <FileText className="w-4 h-4" />
+              Import from PDF
             </button>
             {cards.length > 0 && (
               <button
@@ -286,6 +305,14 @@ export default function CreateStudySetPage() {
             />
           </div>
         </div>
+      )}
+
+      {/* PDF Import Modal */}
+      {showPDFImport && (
+        <PDFImport
+          onImport={handlePDFImport}
+          onClose={() => setShowPDFImport(false)}
+        />
       )}
     </div>
   );

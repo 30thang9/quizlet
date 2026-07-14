@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { 
   ArrowLeft, BookOpen, Zap, Brain, FileText, Share2, 
   Edit, Copy, Heart, MoreVertical, User, Clock,
-  Plus, Trash2, Eye, MessageCircle
+  Plus, Trash2, Eye, MessageCircle, GitBranch
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ShareModal } from '@/components/study';
@@ -221,7 +221,7 @@ export default function StudySetDetailPage() {
       {/* Study Modes */}
       <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-6">
         <h2 className="text-lg font-bold text-gray-800 mb-4">Study Modes</h2>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           <button
             onClick={() => router.push(`/study/${studySet.id}?mode=cards`)}
             className="p-4 border border-gray-200 rounded-xl hover:border-sky-500 hover:bg-sky-50 transition-colors text-center"
@@ -249,6 +249,13 @@ export default function StudySetDetailPage() {
           >
             <FileText className="w-8 h-8 text-orange-500 mx-auto mb-2" />
             <span className="font-medium text-gray-800">Test</span>
+          </button>
+          <button
+            onClick={() => router.push(`/study/${studySet.id}?mode=diagram`)}
+            className="p-4 border border-gray-200 rounded-xl hover:border-pink-500 hover:bg-pink-50 transition-colors text-center"
+          >
+            <GitBranch className="w-8 h-8 text-pink-500 mx-auto mb-2" />
+            <span className="font-medium text-gray-800">Diagram</span>
           </button>
           <button
             onClick={() => setShowAskQuizlet(true)}

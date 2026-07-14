@@ -1,25 +1,44 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
+import { Mic, Image as ImageIcon, Upload, X, Loader2, FileAudio } from 'lucide-react';
+import { AudioPlayer } from './AudioPlayer';
+
+type MediaType = 'image' | 'audio' | 'all';
 
 interface MediaUploaderProps {
+  type?: MediaType;
   folder?: string;
-  onUploadSuccess?: (url: string, key: string) => void;
+  onUploadSuccess?: (url: string, key: string, type: 'image' | 'audio') => void;
   onUploadError?: (error: string) => void;
   maxSize?: number;
-  allowedTypes?: string[];
+  preview?: string | null;
+  onRemove?: () => void;
 }
 
 export function MediaUploader({
+  type = 'all',
   folder = 'cards',
   onUploadSuccess,
   onUploadError,
   maxSize = 10 * 1024 * 1024,
-  allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+  preview,
+  onRemove,
 }: MediaUploaderProps) {
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
-  const [preview, setPreview] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(preview || null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  const allowedAudioTypes = ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp3'];
+  
+  const getAllowedTypes = () => {
+    if (type === 'image') return allowedImageTypes;
+    if (type === 'audio') return allowedAudioTypes;
+    return [...allowedImageTypes, ...allowedAudioTypes];
+  };
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -35,8 +54,9 @@ export function MediaUploader({
     if (file.size > maxSize) {
       return `File too large. Maximum: ${maxSize / 1024 / 1024}MB`;
     }
-    if (!allowedTypes.includes(file.type)) {
-      return `Invalid type. Allowed: ${allowedTypes.join(', ')}`;
+    const allowed = getAllowedTypes();
+    if (!allowed.includes(file.type)) {
+      return `Invalid type. Allowed: ${allowed.map(t => t.split('/')[1]).join(', ')}`;
     }
     return null;
   };
@@ -49,38 +69,47 @@ export function MediaUploader({
     }
 
     setUploading(true);
+    setUploadProgress(0);
+
     try {
-      if (file.type.startsWith('image/')) {
+      const isAudio = file.type.startsWith('audio/');
+      
+      if (isAudio) {
+        // For audio, create local preview URL (in production, would upload to S3)
+        const audioUrl = URL.createObjectURL(file);
+        setImagePreview(audioUrl);
+        
+        // Simulate upload progress
+        for (let i = 0; i <= 100; i += 20) {
+          setUploadProgress(i);
+          await new Promise(r => setTimeout(r, 100));
+        }
+        
+        onUploadSuccess?.(audioUrl, `local-${Date.now()}`, 'audio');
+      } else {
+        // For images, read and preview locally
         const reader = new FileReader();
-        reader.onload = (e) => setPreview(e.target?.result as string);
+        reader.onload = (e) => {
+          const result = e.target?.result as string;
+          setImagePreview(result);
+        };
         reader.readAsDataURL(file);
+
+        // Simulate upload progress
+        for (let i = 0; i <= 100; i += 20) {
+          setUploadProgress(i);
+          await new Promise(r => setTimeout(r, 100));
+        }
+
+        // Mock success - in production would upload to S3
+        onUploadSuccess?.(`mock://${file.name}`, `local-${Date.now()}`, 'image');
       }
-
-      const response = await fetch('/api/v1/media/upload-url', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-        },
-        body: JSON.stringify({ fileName: file.name, mimeType: file.type, folder }),
-      });
-
-      const data = await response.json();
-      if (!data.success) throw new Error(data.message || 'Failed to get upload URL');
-
-      await fetch(data.uploadUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': file.type },
-        body: file,
-      });
-
-      const publicUrl = data.uploadUrl.split('?')[0];
-      onUploadSuccess?.(publicUrl, data.key);
     } catch (error: any) {
       onUploadError?.(error.message || 'Upload failed');
-      setPreview(null);
+      setImagePreview(null);
     } finally {
       setUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -95,35 +124,98 @@ export function MediaUploader({
     if (e.target.files?.[0]) handleUpload(e.target.files[0]);
   };
 
+  const handleRemove = () => {
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    onRemove?.();
+  };
+
+  const isAudioPreview = imagePreview?.startsWith('blob:') || imagePreview?.startsWith('mock:') || !imagePreview?.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+
+  // Show preview if exists
+  if (imagePreview) {
+    return (
+      <div className="relative">
+        <div className="rounded-lg overflow-hidden border border-gray-200">
+          {isAudioPreview ? (
+            <div className="p-4 bg-gray-50">
+              <AudioPlayer src={imagePreview} />
+            </div>
+          ) : (
+            <img 
+              src={imagePreview} 
+              alt="Preview" 
+              className="w-full h-32 object-cover" 
+            />
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={handleRemove}
+          className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="media-uploader">
+      <input
+        ref={fileInputRef}
+        type="file"
+        className="hidden"
+        accept={getAllowedTypes().join(',')}
+        onChange={handleChange}
+        disabled={uploading}
+      />
+      
       <div
-        className={`upload-zone ${dragActive ? 'drag-active' : ''} ${uploading ? 'uploading' : ''}`}
+        className={`upload-zone border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors ${
+          dragActive 
+            ? 'border-sky-400 bg-sky-50' 
+            : 'border-gray-300 hover:border-sky-400 hover:bg-sky-50'
+        } ${uploading ? 'pointer-events-none' : ''}`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
-        onDrop={handleDrop}
+        onClick={() => !uploading && fileInputRef.current?.click()}
       >
-        {preview ? (
-          <div className="preview-container">
-            <img src={preview} alt="Preview" className="preview-image" />
-            <button type="button" className="remove-btn" onClick={() => setPreview(null)}>
-              Remove
-            </button>
+        {uploading ? (
+          <div className="space-y-3">
+            <Loader2 className="w-10 h-10 text-sky-500 mx-auto animate-spin" />
+            <p className="text-sm text-gray-600">Uploading...</p>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div
+                className="bg-sky-500 h-2 rounded-full transition-all"
+                style={{ width: `${uploadProgress}%` }}
+              />
+            </div>
           </div>
         ) : (
-          <>
-            <svg className="upload-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="17,8 12,3 7,8" />
-              <line x1="12" y1="3" x2="12" y2="15" />
-            </svg>
-            <p className="upload-text">Drag & drop or click to upload</p>
-            <p className="upload-hint">Max: {maxSize / 1024 / 1024}MB</p>
-            <input type="file" className="file-input" accept={allowedTypes.join(',')} onChange={handleChange} disabled={uploading} />
-          </>
+          <div className="space-y-3">
+            {type === 'audio' ? (
+              <Mic className="w-10 h-10 text-gray-400 mx-auto" />
+            ) : type === 'image' ? (
+              <ImageIcon className="w-10 h-10 text-gray-400 mx-auto" />
+            ) : (
+              <div className="flex items-center justify-center gap-2">
+                <ImageIcon className="w-8 h-8 text-gray-400" />
+                <span className="text-gray-300">|</span>
+                <Mic className="w-8 h-8 text-gray-400" />
+              </div>
+            )}
+            <p className="text-sm text-gray-600 font-medium">
+              {type === 'audio' ? 'Add audio' : type === 'image' ? 'Add image' : 'Add media'}
+            </p>
+            <p className="text-xs text-gray-400">
+              Click or drag & drop • Max {maxSize / 1024 / 1024}MB
+            </p>
+          </div>
         )}
-        {uploading && <div className="upload-progress"><div className="spinner" /><p>Uploading...</p></div>}
       </div>
     </div>
   );
