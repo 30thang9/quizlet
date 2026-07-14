@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
-import { MagicNotes } from '@/components/ai';
+import { MagicNotes } from '@/features/ai/components';
 
 export default function MagicNotesPage() {
   const router = useRouter();

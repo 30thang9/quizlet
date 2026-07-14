@@ -8,9 +8,9 @@ import {
   Plus, Trash2, Eye, MessageCircle, GitBranch
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ShareModal } from '@/components/study';
-import { TagsInput } from '@/components/tags';
-import { AskQuizlet } from '@/components/ai';
+import { ShareModal } from '@/features/study/components';
+import { TagsInput } from '@/features/tags/components';
+import { AskQuizlet } from '@/features/ai/components';
 
 interface Tag {
   id: string;

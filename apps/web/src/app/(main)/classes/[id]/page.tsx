@@ -25,7 +25,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { StudySetCard } from '@/components/study-sets';
+import { StudySetCard } from '@/features/study-sets/components';
 
 interface ClassMember {
   id: string;

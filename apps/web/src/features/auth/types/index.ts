@@ -1,1 +1,2 @@
-// Barrel export
+// Auth types
+export * from './auth.types';

@@ -1,15 +1,43 @@
 // Feature barrel exports
-// Re-export components
+
+// Components
 export * from './components';
 
-// Re-export hooks
+// Hooks
 export * from './hooks';
 
-// Re-export types
+// Schemas (Zod)
+export * from './schemas';
+
+// Types (TypeScript)
 export * from './types';
 
-// Re-export constants
+// Actions (Server Actions)
+export * from './actions';
+
+// Constants
 export * from './constants';
 
-// Re-export utilities
+// Utilities
 export * from './utils';
+
+// Services
+export * from './services';
+
+// Store
+export * from './store';
+
+// Queries
+export * from './queries';
+
+// Mutations
+export * from './mutations';
+
+// Permissions
+export * from './permissions';
+
+// Validators
+export * from './validators';
+
+// API
+export * from './api';

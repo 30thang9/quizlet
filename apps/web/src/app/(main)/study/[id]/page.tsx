@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, BookOpen, Zap, Brain, FileText, PenLine } from 'lucide-react';
-import { StudySession, MatchMode, LearnMode, TestMode, WrittenMode, Card } from '@/components/study';
+import { StudySession, MatchMode, LearnMode, TestMode, WrittenMode, Card } from '@/features/study/components';
 
 // Demo data - in production this would come from API
 const demoStudySet = {

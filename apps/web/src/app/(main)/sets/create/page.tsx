@@ -5,10 +5,10 @@ import { useRouter } from 'next/navigation';
 import { Plus, Trash2, Save, ArrowLeft, GripVertical, Image as ImageIcon, Mic, Upload, Download, Sparkles, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ImportExportModal } from '@/components/study';
+import { ImportExportModal } from '@/features/study/components';
 import { ImportCard } from '@/lib/utils/importExport';
-import { AIGenerator } from '@/components/ai';
-import { PDFImport } from '@/components/import/PDFImport';
+import { AIGenerator } from '@/features/ai/components';
+import { PDFImport } from '@/features/import/components';
 
 interface Card {
   id: string;

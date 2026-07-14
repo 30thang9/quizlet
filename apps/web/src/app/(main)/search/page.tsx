@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { SearchBar } from '@/components/search';
+import { SearchBar } from '@/features/search/components';
 import { BookOpen, Filter, TrendingUp, Clock, SortAsc, User } from 'lucide-react';
 import Link from 'next/link';
 
