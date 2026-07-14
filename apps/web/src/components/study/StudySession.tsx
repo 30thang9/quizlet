@@ -9,6 +9,7 @@ export interface Card {
   term: string;
   definition: string;
   imageUrl?: string;
+  hint?: string;
 }
 
 interface StudySessionProps {
