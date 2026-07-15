@@ -9,31 +9,37 @@ import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
-import { authApi, loginSchema } from '../api';
+import { useAuth } from '../hooks';
+import { loginSchema } from '../api';
 import type { LoginFormData, LoginFormProps } from '../api';
 
 export function LoginForm({ redirectTo = '/dashboard' }: LoginFormProps) {
   const router = useRouter();
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });
 
   const onSubmit = async (data: LoginFormData) => {
     setError('');
+    setIsSubmitting(true);
 
-    try {
-      await authApi.login(data);
+    const result = await login(data.email, data.password);
+
+    if (result.success) {
       router.push(redirectTo);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
+    } else {
+      setError(result.error || 'Login failed');
     }
+    setIsSubmitting(false);
   };
 
   return (

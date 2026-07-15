@@ -1,1 +1,1 @@
-// Barrel export
+export { useAuth, AuthProvider } from './useAuth';

@@ -9,31 +9,37 @@ import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
-import { authApi, registerSchema } from '../api';
+import { useAuth } from '../hooks';
+import { registerSchema } from '../api';
 import type { RegisterFormData, RegisterFormProps } from '../api';
 
 export function RegisterForm({ redirectTo = '/dashboard' }: RegisterFormProps) {
   const router = useRouter();
+  const { register: registerUser } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
-    register,
+    register: registerField,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
   });
 
   const onSubmit = async (data: RegisterFormData) => {
     setError('');
+    setIsSubmitting(true);
 
-    try {
-      await authApi.register(data);
+    const result = await registerUser(data.email, data.password, data.name);
+
+    if (result.success) {
       router.push(redirectTo);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Registration failed');
+    } else {
+      setError(result.error || 'Registration failed');
     }
+    setIsSubmitting(false);
   };
 
   return (
@@ -61,7 +67,7 @@ export function RegisterForm({ redirectTo = '/dashboard' }: RegisterFormProps) {
             id="name"
             type="text"
             placeholder="Your name"
-            {...register('name')}
+            {...registerField('name')}
             disabled={isSubmitting}
           />
           {errors.name && (
@@ -75,7 +81,7 @@ export function RegisterForm({ redirectTo = '/dashboard' }: RegisterFormProps) {
             id="email"
             type="email"
             placeholder="you@example.com"
-            {...register('email')}
+            {...registerField('email')}
             disabled={isSubmitting}
           />
           {errors.email && (
@@ -90,7 +96,7 @@ export function RegisterForm({ redirectTo = '/dashboard' }: RegisterFormProps) {
               id="password"
               type={showPassword ? 'text' : 'password'}
               placeholder="••••••••"
-              {...register('password')}
+              {...registerField('password')}
               disabled={isSubmitting}
               className="pr-10"
             />
