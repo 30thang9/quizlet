@@ -11,7 +11,6 @@ export function useLocalStorage<T>(
   key: string,
   initialValue: T
 ): [T, (value: T | ((val: T) => T)) => void, () => void] {
-  // Get initial value from localStorage or use default
   const [storedValue, setStoredValue] = useState<T>(() => {
     if (typeof window === 'undefined') {
       return initialValue;
@@ -26,7 +25,6 @@ export function useLocalStorage<T>(
     }
   });
 
-  // Sync with localStorage on mount
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -40,7 +38,6 @@ export function useLocalStorage<T>(
     }
   }, [key]);
 
-  // Set value function
   const setValue = useCallback(
     (value: T | ((val: T) => T)) => {
       try {
@@ -57,7 +54,6 @@ export function useLocalStorage<T>(
     [key, storedValue]
   );
 
-  // Remove value function
   const removeValue = useCallback(() => {
     try {
       setStoredValue(initialValue);

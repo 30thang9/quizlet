@@ -1,1 +1,2 @@
-// Barrel export
+// AI Services
+export * from './ai.service';

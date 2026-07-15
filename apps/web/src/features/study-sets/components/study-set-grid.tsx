@@ -3,7 +3,7 @@
 import { StudySetCard, StudySetCardProps } from './study-set-card';
 import { Grid, List } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
-import { cn } from '@/lib/utils/cn';
+import { cn } from '@/shared/utils';
 
 interface StudySetGridProps {
   studySets: Omit<StudySetCardProps, 'onEdit' | 'onDelete' | 'onLike' | 'onCopy'>[];

@@ -1,1 +1,2 @@
-// Barrel export
+// AI Types
+export * from './ai.types';

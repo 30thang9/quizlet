@@ -18,7 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
 import { Badge } from '@/shared/components/ui/badge';
 import { StudySetGrid } from '@/features/study-sets/components';
-import { cn } from '@/lib/utils/cn';
+import { cn } from '@/shared/utils';
 
 interface UserProfile {
   id: string;

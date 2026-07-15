@@ -2,20 +2,15 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { MessageCircle, Send, Loader2, Sparkles, X, RefreshCw } from 'lucide-react';
-import { apiEndpoints } from '@/lib/api/client';
-
-type AIProvider = 'openai' | 'gemini' | 'claude';
+import { aiApi } from '@/features/ai/api';
+import type { AIProvider } from '@/features/ai/types';
+import type { AskQuizletProps } from '@/features/ai/types';
 
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
-}
-
-interface AskQuizletProps {
-  context?: string;
-  onClose?: () => void;
 }
 
 export function AskQuizlet({ context, onClose }: AskQuizletProps) {
@@ -52,16 +47,16 @@ export function AskQuizlet({ context, onClose }: AskQuizletProps) {
     setIsLoading(true);
 
     try {
-      const answer = await apiEndpoints.ai.answer({
+      const result = await aiApi.answer({
         question: input.trim(),
         context: context || 'You are a helpful AI tutor for Quizlet. Answer questions about any topic.',
         provider,
-      } as any);
+      });
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: answer.answer,
+        content: result.answer,
         timestamp: new Date(),
       };
 

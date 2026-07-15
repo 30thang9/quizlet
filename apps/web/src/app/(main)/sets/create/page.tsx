@@ -6,7 +6,7 @@ import { Plus, Trash2, Save, ArrowLeft, GripVertical, Image as ImageIcon, Mic, U
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { ImportExportModal } from '@/features/study/components';
-import { ImportCard } from '@/lib/utils/importExport';
+import { ImportCard } from '@/shared/utils';
 import { AIGenerator } from '@/features/ai/components';
 import { PDFImport } from '@/features/import/components';
 

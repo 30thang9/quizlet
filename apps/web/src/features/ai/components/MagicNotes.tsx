@@ -2,20 +2,8 @@
 
 import { useState, useCallback } from 'react';
 import { Sparkles, Loader2, FileText, BookOpen, List } from 'lucide-react';
-import { apiEndpoints } from '@/lib/api/client';
-
-type AIProvider = 'openai' | 'gemini' | 'claude';
-
-interface GeneratedCard {
-  term: string;
-  definition: string;
-  hint?: string;
-}
-
-interface MagicNotesProps {
-  onAddCards?: (cards: GeneratedCard[]) => void;
-  onClose?: () => void;
-}
+import { aiApi } from '@/features/ai/api';
+import type { GeneratedCard, AIProvider, MagicNotesProps } from '@/features/ai/types';
 
 export function MagicNotes({ onAddCards, onClose }: MagicNotesProps) {
   const [content, setContent] = useState('');
@@ -39,11 +27,11 @@ export function MagicNotes({ onAddCards, onClose }: MagicNotesProps) {
     setCards([]);
 
     try {
-      const result = await apiEndpoints.ai.magicNotes({
+      const result = await aiApi.magicNotes({
         content,
         cardCount,
         provider,
-      } as any);
+      });
       
       setSummary(result.summary);
       setCards(result.flashcards);

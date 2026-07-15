@@ -227,6 +227,251 @@ export const storage = {
   },
 };
 
+// ============ Import/Export ============
+
+export interface ImportCard {
+  term: string;
+  definition: string;
+}
+
+export interface ImportResult {
+  success: boolean;
+  cards: ImportCard[];
+  errors: string[];
+}
+
+export interface ExportCard {
+  term: string;
+  definition: string;
+  imageUrl?: string;
+}
+
+export type ExportFormat = 'csv' | 'json' | 'txt' | 'anki';
+
+export function parseCSV(content: string): ImportResult {
+  const cards: ImportCard[] = [];
+  const errors: string[] = [];
+  
+  const lines = content.split(/\r?\n/).filter((line) => line.trim());
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    
+    if (i === 0 && /^(term|word|stimulus|front|question)/i.test(line)) {
+      continue;
+    }
+    
+    let parts: string[];
+    if (line.includes('\t')) {
+      parts = line.split('\t');
+    } else {
+      parts = parseCSVLine(line);
+    }
+    
+    if (parts.length < 2) {
+      if (line.trim()) {
+        errors.push(`Line ${i + 1}: Not enough columns`);
+      }
+      continue;
+    }
+    
+    const term = parts[0]?.trim().replace(/^["']|["']$/g, '');
+    const definition = parts[1]?.trim().replace(/^["']|["']$/g, '');
+    
+    if (!term || !definition) {
+      errors.push(`Line ${i + 1}: Empty term or definition`);
+      continue;
+    }
+    
+    cards.push({ term, definition });
+  }
+  
+  return { success: cards.length > 0, cards, errors };
+}
+
+function parseCSVLine(line: string): string[] {
+  const result: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    
+    if (char === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        current += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (char === ',' && !inQuotes) {
+      result.push(current);
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  
+  result.push(current);
+  return result;
+}
+
+export function exportToCSV(cards: ExportCard[]): string {
+  const header = 'Term,Definition';
+  const rows = cards.map((card) => {
+    const term = escapeCSVField(card.term);
+    const definition = escapeCSVField(card.definition);
+    return `${term},${definition}`;
+  });
+  return [header, ...rows].join('\n');
+}
+
+function escapeCSVField(field: string): string {
+  if (field.includes(',') || field.includes('"') || field.includes('\n')) {
+    return `"${field.replace(/"/g, '""')}"`;
+  }
+  return field;
+}
+
+export function exportToJSON(cards: ExportCard[]): string {
+  return JSON.stringify({
+    exportDate: new Date().toISOString(),
+    cardCount: cards.length,
+    cards: cards.map(card => ({ front: card.term, back: card.definition })),
+  }, null, 2);
+}
+
+export function exportToAnki(cards: ExportCard[]): string {
+  return cards.map((card) => {
+    const front = card.term.replace(/\t/g, ' ').replace(/\n/g, '<br>');
+    const back = card.definition.replace(/\t/g, ' ').replace(/\n/g, '<br>');
+    return `${front}\t${back}`;
+  }).join('\n');
+}
+
+export function exportToTXT(cards: ExportCard[]): string {
+  const header = '='.repeat(50);
+  return [
+    header,
+    'STUDY SET EXPORT',
+    header,
+    '',
+    ...cards.map((card, i) => `${i + 1}. ${card.term}\n   ${card.definition}`),
+    '',
+    header,
+    `Total cards: ${cards.length}`,
+    `Exported: ${new Date().toLocaleString()}`,
+    header,
+  ].join('\n');
+}
+
+export function exportStudySet(cards: ExportCard[], title: string, format: ExportFormat = 'csv'): void {
+  let content: string;
+  let filename: string;
+  
+  switch (format) {
+    case 'csv':
+      content = exportToCSV(cards);
+      filename = generateExportFilename(title, 'csv');
+      break;
+    case 'json':
+      content = exportToJSON(cards);
+      filename = generateExportFilename(title, 'json');
+      break;
+    case 'txt':
+      content = exportToTXT(cards);
+      filename = generateExportFilename(title, 'txt');
+      break;
+    case 'anki':
+      content = exportToAnki(cards);
+      filename = generateExportFilename(title, 'txt');
+      break;
+    default:
+      content = exportToCSV(cards);
+      filename = generateExportFilename(title, 'csv');
+  }
+  
+  downloadFile(content, filename);
+}
+
+export function generateExportFilename(title: string, format: ExportFormat = 'csv'): string {
+  const sanitized = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const timestamp = new Date().toISOString().split('T')[0];
+  return `${sanitized || 'study-set'}-${timestamp}.${format}`;
+}
+
+export function downloadFile(content: string, filename: string, mimeType?: string): void {
+  const mimeTypes: Record<string, string> = {
+    csv: 'text/csv',
+    json: 'application/json',
+    txt: 'text/plain',
+    anki: 'text/plain',
+  };
+  const type = mimeType || mimeTypes[filename.split('.').pop() || 'csv'] || 'text/plain';
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+export function readFile(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(e.target?.result as string);
+    reader.onerror = reject;
+    reader.readAsText(file);
+  });
+}
+
+export async function importFromFile(file: File): Promise<ImportResult> {
+  const content = await readFile(file);
+  return parseCSV(content);
+}
+
+// ============ Date Formatting (Extended) ============
+
+export function formatStudyTime(totalSeconds: number): string {
+  if (totalSeconds < 60) {
+    return `${totalSeconds} seconds`;
+  } else if (totalSeconds < 3600) {
+    const mins = Math.floor(totalSeconds / 60);
+    return `${mins} minute${mins !== 1 ? 's' : ''}`;
+  } else {
+    const hours = Math.floor(totalSeconds / 3600);
+    const mins = Math.floor((totalSeconds % 3600) / 60);
+    if (mins === 0) {
+      return `${hours} hour${hours !== 1 ? 's' : ''}`;
+    }
+    return `${hours}h ${mins}m`;
+  }
+}
+
+export function getTimeUntil(date: Date | string): string {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  const now = new Date();
+  const diffMs = d.getTime() - now.getTime();
+
+  if (diffMs < 0) return 'now';
+
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+
+  if (diffDays > 0) return `in ${diffDays} day${diffDays !== 1 ? 's' : ''}`;
+  if (diffHours > 0) return `in ${diffHours} hour${diffHours !== 1 ? 's' : ''}`;
+  return `in ${diffMins} minute${diffMins !== 1 ? 's' : ''}`;
+}
+
+export function isDue(date: Date | string): boolean {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  return d <= new Date();
+}
+
 // ============ Async Utilities ============
 
 export async function retry<T>(

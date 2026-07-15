@@ -1,1 +1,2 @@
-// Barrel export
+// Search Types
+export * from './search.types';

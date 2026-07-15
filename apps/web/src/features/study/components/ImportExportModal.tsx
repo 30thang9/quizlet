@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { Upload, Download, FileText, AlertCircle, Check, X } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
-import { parseCSV, exportToCSV, downloadFile, generateExportFilename, readFile, ImportCard } from '@/lib/utils/importExport';
+import { parseCSV, exportToCSV, downloadFile, generateExportFilename, readFile, ImportCard } from '@/shared/utils';
 import { Card } from '@/components/study/StudySession';
 
 interface ImportExportModalProps {

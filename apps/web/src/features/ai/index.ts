@@ -1,15 +1,24 @@
-// Feature barrel exports
-// Re-export components
-export * from './components';
+// AI Feature barrel exports
 
-// Re-export hooks
-export * from './hooks';
+// API Layer
+export * from './api';
 
-// Re-export types
+// Service Layer
+export * from './services';
+
+// Query Layer (React Query hooks)
+export * from './queries';
+
+// Schemas (Zod validation)
+export * from './schemas';
+
+// Types
 export * from './types';
 
-// Re-export constants
-export * from './constants';
+// Components
+export { AIGenerator, type AIGeneratorProps } from './components/AIGenerator';
+export { AskQuizlet, type AskQuizletProps } from './components/AskQuizlet';
+export { MagicNotes, type MagicNotesProps } from './components/MagicNotes';
 
-// Re-export utilities
-export * from './utils';
+// Constants
+export * from './constants';

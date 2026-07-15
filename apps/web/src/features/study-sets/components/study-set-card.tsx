@@ -11,8 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils/cn';
-import { formatNumber } from '@/lib/utils';
+import { cn, formatNumber } from '@/shared/utils';
 
 interface StudySetCardProps {
   id: string;

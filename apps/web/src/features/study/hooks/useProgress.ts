@@ -1,38 +1,8 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { progressApi } from '@/lib/api/endpoints';
-
-export interface StudySession {
-  id: string;
-  studySetId?: string;
-  mode: string;
-  startedAt: Date;
-  cardsStudied?: number;
-  correctCount?: number;
-  timeSpentSeconds?: number;
-  mistakes?: number;
-  score?: number;
-}
-
-export interface CardProgress {
-  cardId: string;
-  easeFactor: number;
-  interval: number;
-  repetitions: number;
-  dueDate: Date;
-  lastReviewed?: Date;
-}
-
-export interface StudyStats {
-  totalCardsStudied: number;
-  totalStudyTime: number;
-  averageScore: number;
-  studyStreak: number;
-  cardsLearned: number;
-  cardsMastered: number;
-  dueCardsCount: number;
-}
+import { progressApi } from '../api/study.api';
+import type { StudySession, CardProgress, StudyStats } from '../types';
 
 interface CreateSessionParams {
   studySetId?: string;
@@ -62,7 +32,7 @@ export function useProgress() {
     setError(null);
     try {
       const session = await progressApi.createSession(params);
-      return session as unknown as StudySession;
+      return session;
     } catch (err: any) {
       setError(err.message || 'Failed to create session');
       return null;
@@ -90,7 +60,7 @@ export function useProgress() {
     setError(null);
     try {
       const progress = await progressApi.reviewCard(params);
-      return progress as unknown as CardProgress;
+      return progress;
     } catch (err: any) {
       setError(err.message || 'Failed to review card');
       return null;
@@ -104,7 +74,7 @@ export function useProgress() {
     setError(null);
     try {
       const progress = await progressApi.getCardProgress(cardId);
-      return progress as unknown as CardProgress;
+      return progress;
     } catch (err: any) {
       setError(err.message || 'Failed to get card progress');
       return null;
@@ -118,7 +88,7 @@ export function useProgress() {
     setError(null);
     try {
       const result = await progressApi.getDueCards(params);
-      return result as unknown as any[];
+      return result;
     } catch (err: any) {
       setError(err.message || 'Failed to get due cards');
       return [];
@@ -146,7 +116,7 @@ export function useProgress() {
     setError(null);
     try {
       const stats = await progressApi.getStats();
-      return stats as unknown as StudyStats;
+      return stats;
     } catch (err: any) {
       setError(err.message || 'Failed to get stats');
       return null;
@@ -167,3 +137,5 @@ export function useProgress() {
     getStats,
   };
 }
+
+export type { CreateSessionParams, EndSessionParams, ReviewCardParams };

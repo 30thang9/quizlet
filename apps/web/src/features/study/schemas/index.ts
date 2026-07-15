@@ -1,1 +1,2 @@
-// Barrel export
+// Study Schemas
+export * from './study.schema';

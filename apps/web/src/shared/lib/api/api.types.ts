@@ -1,6 +1,5 @@
 /**
  * Standard API Response Types
- * Matches backend response wrapper
  */
 
 export interface ApiResponse<T = any> {
@@ -28,18 +27,12 @@ export interface PaginatedResponse<T> {
   meta: ApiMeta;
 }
 
-/**
- * Type guard to check if response is successful
- */
 export function isSuccessResponse<T>(
   response: ApiResponse<T>,
 ): response is ApiResponse<T> & { data: T } {
   return response.success === true && response.data !== undefined;
 }
 
-/**
- * Type guard to check if response is paginated
- */
 export function isPaginatedResponse<T>(
   response: ApiResponse<T[]>,
 ): response is ApiResponse<T[]> & { meta: ApiMeta } {

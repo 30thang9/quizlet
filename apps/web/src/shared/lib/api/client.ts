@@ -3,7 +3,7 @@
  * Handles auth token, refresh, and error transformation
  */
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
-import { ApiResponse, ApiError } from '@/types/api/response';
+import { ApiResponse, ApiError } from './api.types';
 import { storage } from '@/shared/utils';
 import { AUTH_CONFIG } from '@/shared/config';
 

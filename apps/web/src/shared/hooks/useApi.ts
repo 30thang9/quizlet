@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { ApiResponse, ApiError } from '@/types/api/response';
+import { ApiResponse, ApiError } from '@/shared/lib/api/api.types';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 

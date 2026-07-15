@@ -1,27 +1,11 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback, memo, useMemo } from 'react';
+import { useState, useRef, useCallback, memo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search as SearchIcon, X, Clock, TrendingUp, Users, BookOpen } from 'lucide-react';
-
-interface SearchResult {
-  id: string;
-  title: string;
-  description?: string;
-  cardCount: number;
-  user: {
-    name: string;
-    username: string;
-  };
-  tags?: { name: string; color: string }[];
-  visibility: string;
-}
-
-interface SearchBarProps {
-  variant?: 'header' | 'page';
-  placeholder?: string;
-  autoFocus?: boolean;
-}
+import { useDebounce } from '@/shared/hooks';
+import { searchApi } from '@/features/search/api';
+import type { SearchResult, SearchBarProps } from '@/features/search/types';
 
 const FILTERS = [
   { id: 'popular', label: 'Popular', icon: TrendingUp },
@@ -44,7 +28,7 @@ const SearchBarComponent = ({
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const debouncedQuery = useDebounce(query, DEBOUNCE_DELAY);
 
   // Memoized search function
   const performSearch = useCallback(async (searchQuery: string) => {
@@ -55,13 +39,11 @@ const SearchBarComponent = ({
 
     setIsLoading(true);
     try {
-      const params = new URLSearchParams({ q: searchQuery });
-      if (selectedFilter === 'popular') params.set('sortBy', 'popular');
-      if (selectedFilter === 'recent') params.set('sortBy', 'created');
-
-      const response = await fetch(`/api/v1/search/study-sets?${params}`);
-      const data = await response.json();
-      setResults(data.studySets || []);
+      const response = await searchApi.searchStudySets({
+        q: searchQuery,
+        sortBy: selectedFilter === 'popular' ? 'popular' : selectedFilter === 'recent' ? 'recent' : undefined,
+      });
+      setResults(response.studySets || []);
     } catch {
       setResults([]);
     } finally {
@@ -69,26 +51,14 @@ const SearchBarComponent = ({
     }
   }, [selectedFilter]);
 
-  // Debounced search effect
+  // Trigger search when debounced query changes
   useEffect(() => {
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-    }
-
-    if (query.trim()) {
-      debounceRef.current = setTimeout(() => {
-        performSearch(query);
-      }, DEBOUNCE_DELAY);
+    if (debouncedQuery.trim()) {
+      performSearch(debouncedQuery);
     } else {
       setResults([]);
     }
-
-    return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
-    };
-  }, [query, performSearch]);
+  }, [debouncedQuery, performSearch]);
 
   // Memoized handlers
   const handleSubmit = useCallback((e: React.FormEvent) => {

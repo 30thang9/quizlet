@@ -5,7 +5,7 @@ import { Plus, Trash2, GripVertical, Image as ImageIcon, Volume2, Save, X, Copy 
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Textarea } from '@/shared/components/ui/textarea';
-import { cn } from '@/lib/utils/cn';
+import { cn } from '@/shared/utils';
 
 export interface CardData {
   id: string;

@@ -2,25 +2,14 @@
 
 import { useState, useCallback } from 'react';
 import { Sparkles, Loader2, Copy, Check, Plus, Lightbulb } from 'lucide-react';
-import { apiEndpoints } from '@/lib/api/client';
-
-type AIProvider = 'openai' | 'gemini' | 'claude';
-
-interface GeneratedCard {
-  term: string;
-  definition: string;
-  hint?: string;
-}
-
-interface AIGeneratorProps {
-  onAddCards?: (cards: GeneratedCard[]) => void;
-  onClose?: () => void;
-}
+import { aiApi } from '@/features/ai/api';
+import type { GeneratedCard, AIProvider, Difficulty } from '@/features/ai/types';
+import type { AIGeneratorProps } from '@/features/ai/types';
 
 export function AIGenerator({ onAddCards, onClose }: AIGeneratorProps) {
   const [content, setContent] = useState('');
   const [cardCount, setCardCount] = useState(10);
-  const [difficulty, setDifficulty] = useState<'basic' | 'intermediate' | 'advanced'>('intermediate');
+  const [difficulty, setDifficulty] = useState<Difficulty>('intermediate');
   const [includeHints, setIncludeHints] = useState(true);
   const [provider, setProvider] = useState<AIProvider>('openai');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -39,14 +28,14 @@ export function AIGenerator({ onAddCards, onClose }: AIGeneratorProps) {
     setCards([]);
 
     try {
-      const result = await apiEndpoints.ai.generateFlashcards({
+      const result = await aiApi.generateFlashcards({
         content,
         cardCount,
         difficulty,
         includeHints,
         provider,
-      } as any);
-      setCards(result as GeneratedCard[]);
+      });
+      setCards(result.cards);
     } catch (err: any) {
       setError(err?.message || 'Failed to generate flashcards');
     } finally {

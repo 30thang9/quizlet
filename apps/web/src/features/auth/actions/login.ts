@@ -13,7 +13,7 @@ export async function loginAction(credentials: {
   password: string;
 }): Promise<LoginResult> {
   try {
-    const response = await apiEndpoints.auth.login(credentials);
+    const response = await authApi.login(credentials);
     
     storage.set(AUTH_CONFIG.TOKEN_KEY, response.tokens.accessToken);
     storage.set(AUTH_CONFIG.REFRESH_TOKEN_KEY, response.tokens.refreshToken);

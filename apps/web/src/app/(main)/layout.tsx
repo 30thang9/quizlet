@@ -16,7 +16,7 @@ import {
   Search,
   Plus
 } from 'lucide-react';
-import { cn } from '@/lib/utils/cn';
+import { cn } from '@/shared/utils';
 import { Button } from '@/shared/components/ui/button';
 
 const navigation = [

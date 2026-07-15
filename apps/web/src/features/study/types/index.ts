@@ -1,1 +1,2 @@
-// Barrel export
+// Study feature types
+export * from './study.types';

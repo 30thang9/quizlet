@@ -1,1 +1,2 @@
-// Barrel export
+// AI Schemas
+export * from './ai.schema';

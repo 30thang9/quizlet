@@ -13,7 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils/cn';
+import { cn } from '@/shared/utils';
 
 interface Class {
   id: string;

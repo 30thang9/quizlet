@@ -1,15 +1,22 @@
-// Feature barrel exports
-// Re-export components
-export * from './components';
+// Study Sets Feature barrel exports
 
-// Re-export hooks
-export * from './hooks';
+// API Layer
+export * from './api';
 
-// Re-export types
+// Service Layer
+export * from './services';
+
+// Query Layer (React Query hooks)
+export * from './queries';
+
+// Schemas (Zod validation)
+export * from './schemas';
+
+// Types
 export * from './types';
 
-// Re-export constants
-export * from './constants';
+// Components
+export * from './components';
 
-// Re-export utilities
-export * from './utils';
+// Constants
+export * from './constants';

@@ -1,1 +1,2 @@
-// Barrel export
+// Classes Schemas
+export * from './classes.schema';

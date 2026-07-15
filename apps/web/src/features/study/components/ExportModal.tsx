@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { X, Download, FileText, FileJson, FileSpreadsheet, Check } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
-import { exportStudySet, type ExportFormat } from '@/lib/utils/importExport';
+import { exportStudySet, type ExportFormat } from '@/shared/utils';
 
 interface Card {
   id: string;
