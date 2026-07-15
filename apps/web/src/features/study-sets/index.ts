@@ -1,13 +1,8 @@
 // Study Sets Feature barrel exports
 
 // API Layer
+// (re-export from study feature)
 export * from './api';
-
-// Service Layer
-export * from './services';
-
-// Query Layer (React Query hooks)
-export * from './queries';
 
 // Schemas (Zod validation)
 export * from './schemas';

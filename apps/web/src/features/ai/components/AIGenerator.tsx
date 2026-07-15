@@ -2,9 +2,8 @@
 
 import { useState, useCallback } from 'react';
 import { Sparkles, Loader2, Copy, Check, Plus, Lightbulb } from 'lucide-react';
-import { aiApi } from '@/features/ai/api';
-import type { GeneratedCard, AIProvider, Difficulty } from '@/features/ai/types';
-import type { AIGeneratorProps } from '@/features/ai/types';
+import { useGenerateFlashcards } from '@/features/ai/hooks';
+import type { GeneratedCard, AIProvider, Difficulty, AIGeneratorProps } from '@/features/ai/types';
 
 export function AIGenerator({ onAddCards, onClose }: AIGeneratorProps) {
   const [content, setContent] = useState('');
@@ -12,47 +11,37 @@ export function AIGenerator({ onAddCards, onClose }: AIGeneratorProps) {
   const [difficulty, setDifficulty] = useState<Difficulty>('intermediate');
   const [includeHints, setIncludeHints] = useState(true);
   const [provider, setProvider] = useState<AIProvider>('openai');
-  const [isGenerating, setIsGenerating] = useState(false);
   const [cards, setCards] = useState<GeneratedCard[]>([]);
-  const [error, setError] = useState<string | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
+  const { generate, loading, error } = useGenerateFlashcards();
+
   const handleGenerate = useCallback(async () => {
-    if (!content.trim() || content.trim().length < 50) {
-      setError('Content must be at least 50 characters');
-      return;
-    }
+    if (!content.trim() || content.trim().length < 50) return;
 
-    setIsGenerating(true);
-    setError(null);
     setCards([]);
+    const result = await generate({
+      content,
+      cardCount,
+      difficulty,
+      includeHints,
+      provider,
+    });
 
-    try {
-      const result = await aiApi.generateFlashcards({
-        content,
-        cardCount,
-        difficulty,
-        includeHints,
-        provider,
-      });
+    if (result) {
       setCards(result.cards);
-    } catch (err: any) {
-      setError(err?.message || 'Failed to generate flashcards');
-    } finally {
-      setIsGenerating(false);
     }
-  }, [content, cardCount, difficulty, includeHints, provider]);
+  }, [content, cardCount, difficulty, includeHints, provider, generate]);
 
   const handleCopy = useCallback((card: GeneratedCard, index: number) => {
-    const text = `${card.term}: ${card.definition}`;
-    navigator.clipboard.writeText(text);
+    navigator.clipboard.writeText(`${card.term}: ${card.definition}`);
     setCopiedIndex(index);
     setTimeout(() => setCopiedIndex(null), 2000);
   }, []);
 
   const handleAddAll = useCallback(() => {
-    if (cards.length > 0 && onAddCards) {
-      onAddCards(cards);
+    if (cards.length > 0) {
+      onAddCards?.(cards);
     }
   }, [cards, onAddCards]);
 
@@ -150,10 +139,10 @@ export function AIGenerator({ onAddCards, onClose }: AIGeneratorProps) {
         {/* Generate Button */}
         <button
           onClick={handleGenerate}
-          disabled={isGenerating || content.trim().length < 50}
+          disabled={loading || content.trim().length < 50}
           className="w-full py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-xl font-semibold hover:from-orange-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
-          {isGenerating ? (
+          {loading ? (
             <>
               <Loader2 className="w-5 h-5 animate-spin" />
               Generating flashcards...

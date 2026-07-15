@@ -3,11 +3,8 @@
 // API Layer
 export * from './api';
 
-// Service Layer
-export * from './services';
-
-// Query Layer (React Query hooks)
-export * from './queries';
+// Hooks Layer (gọi API)
+export * from './hooks';
 
 // Schemas (Zod validation)
 export * from './schemas';

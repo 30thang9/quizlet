@@ -3,11 +3,8 @@
 // API Layer
 export * from './api';
 
-// Service Layer
-export * from './services';
-
-// Query Layer (React Query hooks)
-export * from './queries';
+// Hooks Layer (gọi API)
+export * from './hooks';
 
 // Schemas (Zod validation)
 export * from './schemas';
@@ -16,9 +13,9 @@ export * from './schemas';
 export * from './types';
 
 // Components
-export { AIGenerator, type AIGeneratorProps } from './components/AIGenerator';
-export { AskQuizlet, type AskQuizletProps } from './components/AskQuizlet';
-export { MagicNotes, type MagicNotesProps } from './components/MagicNotes';
+export { AIGenerator } from './components/AIGenerator';
+export { AskQuizlet } from './components/AskQuizlet';
+export { MagicNotes } from './components/MagicNotes';
 
 // Constants
 export * from './constants';

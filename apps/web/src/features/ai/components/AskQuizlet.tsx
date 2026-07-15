@@ -2,9 +2,8 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { MessageCircle, Send, Loader2, Sparkles, X, RefreshCw } from 'lucide-react';
-import { aiApi } from '@/features/ai/api';
-import type { AIProvider } from '@/features/ai/types';
-import type { AskQuizletProps } from '@/features/ai/types';
+import { useAnswerQuestion } from '@/features/ai/hooks';
+import type { AIProvider, AskQuizletProps } from '@/features/ai/types';
 
 interface Message {
   id: string;
@@ -23,17 +22,18 @@ export function AskQuizlet({ context, onClose }: AskQuizletProps) {
     },
   ]);
   const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [provider, setProvider] = useState<AIProvider>('openai');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  const { answer, loading } = useAnswerQuestion();
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const handleSend = useCallback(async () => {
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || loading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -44,24 +44,24 @@ export function AskQuizlet({ context, onClose }: AskQuizletProps) {
 
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
-    setIsLoading(true);
 
     try {
-      const result = await aiApi.answer({
+      const result = await answer({
         question: input.trim(),
         context: context || 'You are a helpful AI tutor for Quizlet. Answer questions about any topic.',
         provider,
       });
 
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: result.answer,
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [...prev, assistantMessage]);
-    } catch (err: any) {
+      if (result) {
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: result.answer,
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, assistantMessage]);
+      }
+    } catch {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
@@ -69,11 +69,10 @@ export function AskQuizlet({ context, onClose }: AskQuizletProps) {
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
-      inputRef.current?.focus();
     }
-  }, [input, isLoading, context, provider]);
+
+    inputRef.current?.focus();
+  }, [input, loading, context, provider, answer]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {

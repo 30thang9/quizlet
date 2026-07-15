@@ -1,1 +1,2 @@
-// Barrel export
+// Search Hooks
+export { useSearch } from './useSearch';

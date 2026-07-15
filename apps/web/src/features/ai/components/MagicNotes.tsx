@@ -2,46 +2,37 @@
 
 import { useState, useCallback } from 'react';
 import { Sparkles, Loader2, FileText, BookOpen, List } from 'lucide-react';
-import { aiApi } from '@/features/ai/api';
+import { useMagicNotes } from '@/features/ai/hooks';
 import type { GeneratedCard, AIProvider, MagicNotesProps } from '@/features/ai/types';
 
 export function MagicNotes({ onAddCards, onClose }: MagicNotesProps) {
   const [content, setContent] = useState('');
   const [cardCount, setCardCount] = useState(10);
   const [provider, setProvider] = useState<AIProvider>('openai');
-  const [isGenerating, setIsGenerating] = useState(false);
   const [summary, setSummary] = useState<string | null>(null);
   const [cards, setCards] = useState<GeneratedCard[]>([]);
-  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'content' | 'summary' | 'cards'>('content');
 
-  const handleGenerate = useCallback(async () => {
-    if (!content.trim() || content.trim().length < 100) {
-      setError('Content must be at least 100 characters for Magic Notes');
-      return;
-    }
+  const { generate, loading, error } = useMagicNotes();
 
-    setIsGenerating(true);
-    setError(null);
+  const handleGenerate = useCallback(async () => {
+    if (!content.trim() || content.trim().length < 100) return;
+
     setSummary(null);
     setCards([]);
 
-    try {
-      const result = await aiApi.magicNotes({
-        content,
-        cardCount,
-        provider,
-      });
-      
+    const result = await generate({
+      content,
+      cardCount,
+      provider,
+    });
+
+    if (result) {
       setSummary(result.summary);
       setCards(result.flashcards);
       setActiveTab('summary');
-    } catch (err: any) {
-      setError(err?.message || 'Failed to generate Magic Notes');
-    } finally {
-      setIsGenerating(false);
     }
-  }, [content, cardCount, provider]);
+  }, [content, cardCount, provider, generate]);
 
   return (
     <div className="bg-white rounded-xl shadow-lg max-w-4xl mx-auto">
@@ -143,10 +134,10 @@ export function MagicNotes({ onAddCards, onClose }: MagicNotesProps) {
 
             <button
               onClick={handleGenerate}
-              disabled={isGenerating || content.trim().length < 100}
+              disabled={loading || content.trim().length < 100}
               className="w-full py-4 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl font-semibold hover:from-purple-600 hover:to-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-lg"
             >
-              {isGenerating ? (
+              {loading ? (
                 <>
                   <Loader2 className="w-6 h-6 animate-spin" />
                   Creating Magic Notes...

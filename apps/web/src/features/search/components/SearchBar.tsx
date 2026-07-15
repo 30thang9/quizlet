@@ -4,8 +4,8 @@ import { useState, useRef, useCallback, memo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search as SearchIcon, X, Clock, TrendingUp, Users, BookOpen } from 'lucide-react';
 import { useDebounce } from '@/shared/hooks';
-import { searchApi } from '@/features/search/api';
-import type { SearchResult, SearchBarProps } from '@/features/search/types';
+import { useSearch } from '@/features/search/hooks';
+import type { SearchBarProps } from '@/features/search/types';
 
 const FILTERS = [
   { id: 'popular', label: 'Popular', icon: TrendingUp },
@@ -24,41 +24,18 @@ const SearchBarComponent = ({
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
-  const [results, setResults] = useState<SearchResult[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const debouncedQuery = useDebounce(query, DEBOUNCE_DELAY);
 
-  // Memoized search function
-  const performSearch = useCallback(async (searchQuery: string) => {
-    if (!searchQuery.trim()) {
-      setResults([]);
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const response = await searchApi.searchStudySets({
-        q: searchQuery,
-        sortBy: selectedFilter === 'popular' ? 'popular' : selectedFilter === 'recent' ? 'recent' : undefined,
-      });
-      setResults(response.studySets || []);
-    } catch {
-      setResults([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [selectedFilter]);
+  const { search, results, loading } = useSearch();
 
   // Trigger search when debounced query changes
   useEffect(() => {
     if (debouncedQuery.trim()) {
-      performSearch(debouncedQuery);
-    } else {
-      setResults([]);
+      search(debouncedQuery, selectedFilter === 'popular' ? 'popular' : selectedFilter === 'recent' ? 'recent' : undefined);
     }
-  }, [debouncedQuery, performSearch]);
+  }, [debouncedQuery, selectedFilter, search]);
 
   // Memoized handlers
   const handleSubmit = useCallback((e: React.FormEvent) => {
