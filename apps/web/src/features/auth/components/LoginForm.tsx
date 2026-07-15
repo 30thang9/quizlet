@@ -9,8 +9,7 @@ import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
-import { loginSchema } from '../api';
-import { loginAction } from '@/features/auth/actions/login';
+import { authApi, loginSchema } from '../api';
 import type { LoginFormData, LoginFormProps } from '../api';
 
 export function LoginForm({ redirectTo = '/dashboard' }: LoginFormProps) {
@@ -29,14 +28,12 @@ export function LoginForm({ redirectTo = '/dashboard' }: LoginFormProps) {
   const onSubmit = async (data: LoginFormData) => {
     setError('');
 
-    const result = await loginAction(data);
-
-    if (!result.success) {
-      setError(result.error || 'Login failed');
-      return;
+    try {
+      await authApi.login(data);
+      router.push(redirectTo);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Login failed');
     }
-
-    router.push(redirectTo);
   };
 
   return (

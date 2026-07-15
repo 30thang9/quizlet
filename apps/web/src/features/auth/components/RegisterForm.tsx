@@ -9,8 +9,7 @@ import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
-import { registerSchema } from '../api';
-import { registerAction } from '@/features/auth/actions/register';
+import { authApi, registerSchema } from '../api';
 import type { RegisterFormData, RegisterFormProps } from '../api';
 
 export function RegisterForm({ redirectTo = '/dashboard' }: RegisterFormProps) {
@@ -29,14 +28,12 @@ export function RegisterForm({ redirectTo = '/dashboard' }: RegisterFormProps) {
   const onSubmit = async (data: RegisterFormData) => {
     setError('');
 
-    const result = await registerAction(data);
-
-    if (!result.success) {
-      setError(result.error || 'Registration failed');
-      return;
+    try {
+      await authApi.register(data);
+      router.push(redirectTo);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Registration failed');
     }
-
-    router.push(redirectTo);
   };
 
   return (
