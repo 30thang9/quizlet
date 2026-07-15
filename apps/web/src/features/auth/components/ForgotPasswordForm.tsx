@@ -8,8 +8,8 @@ import { Loader2 } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
-import { forgotPasswordSchema } from '../schemas/auth.schema';
-import type { ForgotPasswordFormData } from '../types';
+import { forgotPasswordSchema } from '../api';
+import type { ForgotPasswordFormData } from '../api';
 
 export function ForgotPasswordForm() {
   const router = useRouter();

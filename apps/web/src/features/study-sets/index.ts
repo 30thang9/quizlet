@@ -1,17 +1,7 @@
 // Study Sets Feature barrel exports
 
-// API Layer
-// (re-export from study feature)
+// API Layer (includes types & schemas, re-export from study)
 export * from './api';
-
-// Schemas (Zod validation)
-export * from './schemas';
-
-// Types
-export * from './types';
 
 // Components
 export * from './components';
-
-// Constants
-export * from './constants';

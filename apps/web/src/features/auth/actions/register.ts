@@ -15,10 +15,10 @@ export async function registerAction(data: {
 }): Promise<RegisterResult> {
   try {
     const response = await authApi.register(data);
-    
+
     storage.set(AUTH_CONFIG.TOKEN_KEY, response.tokens.accessToken);
     storage.set(AUTH_CONFIG.REFRESH_TOKEN_KEY, response.tokens.refreshToken);
-    
+
     return { success: true };
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Registration failed';

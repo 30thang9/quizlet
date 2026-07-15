@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Search as SearchIcon, X, Clock, TrendingUp, Users, BookOpen } from 'lucide-react';
 import { useDebounce } from '@/shared/hooks';
 import { useSearch } from '@/features/search/hooks';
-import type { SearchBarProps } from '@/features/search/types';
+import type { SearchBarProps } from '@/features/search/api';
 
 const FILTERS = [
   { id: 'popular', label: 'Popular', icon: TrendingUp },

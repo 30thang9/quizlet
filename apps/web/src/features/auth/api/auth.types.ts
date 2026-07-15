@@ -1,6 +1,6 @@
 // Auth types
 import type { z } from 'zod';
-import type { loginSchema, registerSchema, forgotPasswordSchema, resetPasswordSchema } from '../schemas/auth.schema';
+import type { loginSchema, registerSchema, forgotPasswordSchema, resetPasswordSchema } from './auth.schema';
 
 // ============ User & Tokens ============
 

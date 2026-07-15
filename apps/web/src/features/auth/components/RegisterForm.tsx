@@ -9,9 +9,9 @@ import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
-import { registerSchema } from '../schemas/auth.schema';
-import { registerAction } from '../actions/register';
-import type { RegisterFormData, RegisterFormProps } from '../types';
+import { registerSchema } from '../api';
+import { registerAction } from '@/features/auth/actions/register';
+import type { RegisterFormData, RegisterFormProps } from '../api';
 
 export function RegisterForm({ redirectTo = '/dashboard' }: RegisterFormProps) {
   const router = useRouter();

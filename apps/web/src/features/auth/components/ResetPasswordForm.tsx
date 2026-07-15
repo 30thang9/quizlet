@@ -8,8 +8,8 @@ import { Eye, EyeOff, Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
-import { resetPasswordSchema } from '../schemas/auth.schema';
-import type { ResetPasswordFormData, ResetPasswordFormProps } from '../types';
+import { resetPasswordSchema } from '../api';
+import type { ResetPasswordFormData, ResetPasswordFormProps } from '../api';
 
 export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   const [showPassword, setShowPassword] = useState(false);

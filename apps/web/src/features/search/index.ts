@@ -1,19 +1,10 @@
 // Search Feature barrel exports
 
-// API Layer
+// API Layer (includes types & schemas)
 export * from './api';
 
-// Hooks Layer (gọi API)
+// Hooks Layer
 export * from './hooks';
-
-// Schemas (Zod validation)
-export * from './schemas';
-
-// Types
-export * from './types';
 
 // Components
 export { SearchBar } from './components/SearchBar';
-
-// Constants
-export * from './constants';

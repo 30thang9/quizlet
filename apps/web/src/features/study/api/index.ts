@@ -1,3 +1,11 @@
-// Study API
+// Study API Layer
+
+// API functions
 export { studyApi } from './study.api';
-export * from './study.api';
+
+// Types
+export type * from './study.types';
+
+// Schemas
+export * from './study.schema';
+

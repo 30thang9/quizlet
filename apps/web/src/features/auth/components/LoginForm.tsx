@@ -9,9 +9,9 @@ import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
-import { loginSchema } from '../schemas/auth.schema';
-import { loginAction } from '../actions/login';
-import type { LoginFormData, LoginFormProps } from '../types';
+import { loginSchema } from '../api';
+import { loginAction } from '@/features/auth/actions/login';
+import type { LoginFormData, LoginFormProps } from '../api';
 
 export function LoginForm({ redirectTo = '/dashboard' }: LoginFormProps) {
   const router = useRouter();

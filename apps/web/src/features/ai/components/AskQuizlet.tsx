@@ -3,7 +3,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { MessageCircle, Send, Loader2, Sparkles, X, RefreshCw } from 'lucide-react';
 import { useAnswerQuestion } from '@/features/ai/hooks';
-import type { AIProvider, AskQuizletProps } from '@/features/ai/types';
+import type { AIProvider, AskQuizletProps } from '@/features/ai/api';
 
 interface Message {
   id: string;

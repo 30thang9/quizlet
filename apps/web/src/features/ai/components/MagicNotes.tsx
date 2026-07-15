@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import { Sparkles, Loader2, FileText, BookOpen, List } from 'lucide-react';
 import { useMagicNotes } from '@/features/ai/hooks';
-import type { GeneratedCard, AIProvider, MagicNotesProps } from '@/features/ai/types';
+import type { GeneratedCard, AIProvider, MagicNotesProps } from '@/features/ai/api';
 
 export function MagicNotes({ onAddCards, onClose }: MagicNotesProps) {
   const [content, setContent] = useState('');

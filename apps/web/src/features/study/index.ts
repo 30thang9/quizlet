@@ -1,22 +1,13 @@
 // Study Feature barrel exports
 
-// API Layer
+// API Layer (includes types & schemas)
 export * from './api';
 
-// Hooks Layer (gọi API)
+// Hooks Layer
 export { useProgress } from './hooks/useProgress';
 export { useStudy } from './hooks/useStudy';
 export { useStudySession } from './hooks/useStudySession';
 export { useSpacedRepetition } from './hooks/useSpacedRepetition';
 
-// Schemas (Zod validation)
-export * from './schemas';
-
-// Types
-export * from './types';
-
 // Components
 export * from './components';
-
-// Constants
-export * from './constants';

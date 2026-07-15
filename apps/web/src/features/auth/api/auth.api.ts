@@ -1,7 +1,6 @@
 /**
  * Auth API - Layer giao tiếp HTTP
  * Chỉ biết endpoint, không biết business logic
- * Types được định nghĩa trong ../types/
  */
 import { api } from '@/shared/lib/api/client';
 import type {
@@ -12,7 +11,7 @@ import type {
   AuthResponse,
   AuthTokens,
   User,
-} from '../types';
+} from './auth.types';
 
 export const authApi = {
   /**

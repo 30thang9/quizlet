@@ -1,3 +1,10 @@
-// Auth API exports
-export * from './auth.api';
+// Auth API Layer
+
+// API functions
 export { authApi } from './auth.api';
+
+// Types
+export type * from './auth.types';
+
+// Schemas
+export * from './auth.schema';

@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import { Sparkles, Loader2, Copy, Check, Plus, Lightbulb } from 'lucide-react';
 import { useGenerateFlashcards } from '@/features/ai/hooks';
-import type { GeneratedCard, AIProvider, Difficulty, AIGeneratorProps } from '@/features/ai/types';
+import type { GeneratedCard, AIProvider, Difficulty, AIGeneratorProps } from '@/features/ai/api';
 
 export function AIGenerator({ onAddCards, onClose }: AIGeneratorProps) {
   const [content, setContent] = useState('');

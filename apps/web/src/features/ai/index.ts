@@ -1,21 +1,12 @@
 // AI Feature barrel exports
 
-// API Layer
+// API Layer (includes types & schemas)
 export * from './api';
 
-// Hooks Layer (gọi API)
+// Hooks Layer
 export * from './hooks';
-
-// Schemas (Zod validation)
-export * from './schemas';
-
-// Types
-export * from './types';
 
 // Components
 export { AIGenerator } from './components/AIGenerator';
 export { AskQuizlet } from './components/AskQuizlet';
 export { MagicNotes } from './components/MagicNotes';
-
-// Constants
-export * from './constants';

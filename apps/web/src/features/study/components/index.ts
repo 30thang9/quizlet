@@ -11,4 +11,4 @@ export { ShareModal } from './ShareModal';
 export { FlashcardDeck } from './FlashcardDeck';
 
 // Re-export types
-export type { Card } from '@/features/study/types';
+export type { Card } from '@/features/study/api';
